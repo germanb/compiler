@@ -5,8 +5,10 @@
 #define EXTERNA extern
 
 #include <stdio.h>
+#include <string.h>
 #include "codigos.h"
 #include "var_globales.h"
+#include "ts.h"
 
 /*********** prototipos *************/
 
@@ -76,19 +78,20 @@ void scanner() {
 int main( int argc,char *argv[]) {
 
   /* el alumno debera inicializar la variable yyin segun corresponda */
- 
+   
   linea = (char *) malloc (2);
   strcat(linea, "");
 
   nro_linea=0;
-
-  if (argc != 2) {
+    if (argc == 100) {
+  //if (argc != 1) {
     error_handler(6);
     error_handler(COD_IMP_ERRORES);
     exit(1);  
   }
   else {
-    if ((yyin = fopen(argv[1], "r" )) == NULL) {
+    //if ((yyin = fopen(argv[1], "r" )) == NULL) {
+      if ((yyin = fopen("prueba.c", "r" )) == NULL) {
       error_handler(7);
       error_handler(COD_IMP_ERRORES);
       exit(1);
@@ -97,9 +100,14 @@ int main( int argc,char *argv[]) {
   
   sbol=&token1 ;/* la variable token */
   
+  //inicializa las tablas
+  inic_tablas();
+
   scanner();
   unidad_traduccion();
-  
+
+  show_ts();
+
   if (sbol->codigo != CEOF) error_handler(8);
   
 }
@@ -115,21 +123,24 @@ void unidad_traduccion(){
 }
 
 void declaraciones(){
-
   especificador_tipo();
-  if (sbol->codigo == CIDENT) scanner();
-  else error_handler(8);
+  if (sbol->codigo == CIDENT){
+      strcpy(inf_id->nbre,sbol->lexema); 
+      scanner();
+  }
+  else error_handler(16);
   especificador_declaracion();
 }
 
 void especificador_tipo(){
-
+    inf_id->ptr_tipo = en_tabla(sbol->lexema);
   switch (sbol->codigo) {
     case CVOID: scanner(); break;
     case CCHAR: scanner(); break;
     case CINT: scanner(); break;
     case CFLOAT: scanner(); break;
-    default: error_handler(8);
+    //TODO: VER
+    default: error_handler(17);
   }
 }
 
@@ -141,7 +152,7 @@ void especificador_declaracion(){
     case CCOR_ABR:
     case CCOMA:
     case CPYCOMA:  declaracion_variable(); break;
-    default: error_handler(8);
+    default: error_handler(18);
   }
 
 }
@@ -149,14 +160,14 @@ void especificador_declaracion(){
 void definicion_funcion(){
 
   if (sbol->codigo == CPAR_ABR) scanner();
-  else error_handler(8);
+  else error_handler(19);
 
   if (sbol->codigo == CVOID || sbol->codigo == CCHAR || 
       sbol->codigo == CINT || sbol->codigo == CFLOAT) 
    lista_declaraciones_param();
 
   if (sbol->codigo == CPAR_CIE) scanner();
-  else error_handler(8);
+  else error_handler(20);
 
   proposicion_compuesta();
 
@@ -193,15 +204,24 @@ void declaracion_parametro() {
 
 void lista_declaraciones_init(){
 
-  if (sbol->codigo == CIDENT) scanner();
+  if (sbol->codigo == CIDENT){
+      strcpy(inf_id->nbre,sbol->lexema); 
+      scanner();
+  }
   else error_handler(8);
   
   declarador_init();
 
   while (sbol->codigo == CCOMA) {
-    scanner();
+      int aux = inf_id->ptr_tipo;
+      insertarTS();
+      inf_id->ptr_tipo = aux;
+      scanner();
 
-    if (sbol->codigo == CIDENT) scanner();
+    if (sbol->codigo == CIDENT){
+         strcpy(inf_id->nbre,sbol->lexema); 
+        scanner();
+    }
     else error_handler(8);
   
     declarador_init();
@@ -215,12 +235,18 @@ void declaracion_variable(){
   declarador_init();
 
   if (sbol->codigo == CCOMA){
-    scanner();
-
+      
+      int aux = inf_id->ptr_tipo;
+      insertarTS();
+      inf_id->ptr_tipo = aux;
+      scanner();
     lista_declaraciones_init();
   }
 
-  if (sbol->codigo == CPYCOMA) scanner();
+  if (sbol->codigo == CPYCOMA){
+      insertarTS();
+      scanner();
+  }
   else error_handler(8);
 
 }
