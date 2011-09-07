@@ -158,7 +158,6 @@ void especificador_declaracion(){
 }
 
 void definicion_funcion(){
-
   if (sbol->codigo == CPAR_ABR) scanner();
   else error_handler(19);
 
@@ -168,7 +167,7 @@ void definicion_funcion(){
 
   if (sbol->codigo == CPAR_CIE) scanner();
   else error_handler(20);
-
+  insertarTS();
   proposicion_compuesta();
 
 }
