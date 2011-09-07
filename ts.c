@@ -296,10 +296,10 @@ int pushTS(int s, entrada_TS *ptr)
 
 
 void show_ts(){
-int i = 0;
-printf("Tabla de simbolos:\n");
-for(i = 0; i<= topeTS; i++){
-printf("entrada %d con nombre %s\n",i,ts[i].ets->nbre);
-}
+    int i = 0;
+    printf("Tabla de simbolos:\n");
+    for(i = 0; i<= topeTS; i++){
+        printf("entrada %d con nombre %s  Tipo %s \n",i,ts[i].ets->nbre, ts[ts[i].ets->ptr_tipo].ets->nbre);
+    }
 }
 

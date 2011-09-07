@@ -262,10 +262,13 @@ void declarador_init(){
       }
       case CCOR_ABR:{
               scanner();
-
 	      if (sbol->codigo == CCONS_ENT)
-		constante();
-
+              {
+                  inf_id->desc.part_var.arr.cant_elem = sbol->lexema;
+                  inf_id->desc.part_var.arr.ptero_tipo_base = inf_id->ptr_tipo;
+                  inf_id->ptr_tipo = en_tabla("TIPOARREGLO");
+                  constante();
+              }
 	      if (sbol->codigo == CCOR_CIE) scanner();
 	      else error_handler(8);
 
