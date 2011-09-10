@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "codigos.h"
 #include "var_globales.h"
 #include "ts.h"
@@ -156,30 +157,58 @@ void especificador_declaracion(){
   }
 
 }
-
+entrada_TS  *inf_id_aux;
 void definicion_funcion(){
+  pushTB();
   if (sbol->codigo == CPAR_ABR) scanner();
   else error_handler(19);
 
-  if (sbol->codigo == CVOID || sbol->codigo == CCHAR || 
-      sbol->codigo == CINT || sbol->codigo == CFLOAT) 
-   lista_declaraciones_param();
+  if (sbol->codigo == CVOID || sbol->codigo == CCHAR ||
+      sbol->codigo == CINT || sbol->codigo == CFLOAT) {
+      inf_id_aux = inf_id;
+      inf_id = (entrada_TS *) calloc (1,sizeof(entrada_TS));
+      lista_declaraciones_param();
+      inf_id = inf_id_aux;
+  }
 
   if (sbol->codigo == CPAR_CIE) scanner();
   else error_handler(20);
+  popTB();
+  inf_id->clase = CLASFUNC;
   insertarTS();
+  pushTB();
   proposicion_compuesta();
-
+  popTB();
 }
 
 void lista_declaraciones_param(){
 
   declaracion_parametro();
-  
+
+  tipo_inf_res * eslabon = (tipo_inf_res *) calloc (1,sizeof(tipo_inf_res));
+  eslabon->ptero_tipo = inf_id->ptr_tipo;
+  eslabon->tipo_pje = inf_id->desc.part_var.tipo_pje;
+  inf_id_aux->desc.part_var.sub.ptr_inf_res = eslabon;
+  inf_id_aux->desc.part_var.sub.cant_par = 1;
+  inf_id->clase = CLASPAR;
+  insertarTS();
   while (sbol->codigo ==CCOMA) {
       scanner();
 
       declaracion_parametro();
+      tipo_inf_res * eslabon = (tipo_inf_res *) calloc (1,sizeof(tipo_inf_res));
+      eslabon->ptero_tipo = inf_id->ptr_tipo;
+      eslabon->tipo_pje = inf_id->desc.part_var.tipo_pje;
+      tipo_inf_res * eslabonAux = inf_id_aux->desc.part_var.sub.ptr_inf_res;
+      while(eslabonAux->ptr_sig != NULL){
+          eslabonAux = eslabonAux->ptr_sig;
+      }
+      eslabonAux->ptr_sig = eslabon;
+      inf_id_aux->desc.part_var.sub.ptr_inf_res = eslabon;
+      inf_id_aux->desc.part_var.sub.cant_par++;
+      inf_id->clase = CLASPAR;
+      insertarTS();
+      
     }
 }
 
@@ -187,12 +216,20 @@ void declaracion_parametro() {
 
   especificador_tipo();
 
-  if (sbol->codigo == CAMPER) scanner();
-
-  if (sbol->codigo == CIDENT) scanner();
+  if (sbol->codigo == CAMPER){
+      inf_id->desc.part_var.tipo_pje = PAR_REFERENCIA;
+      scanner();
+  }else{
+      inf_id->desc.part_var.tipo_pje = PAR_VALOR;
+  }
+  if (sbol->codigo == CIDENT){
+      strcpy(inf_id->nbre,sbol->lexema);
+      scanner();
+  }
   else error_handler(8);
 
   if (sbol->codigo == CCOR_ABR){
+      inf_id->desc.part_var.tipo_pje = PAR_REFERENCIA;
 
       scanner();
 
@@ -213,6 +250,7 @@ void lista_declaraciones_init(){
 
   while (sbol->codigo == CCOMA) {
       int aux = inf_id->ptr_tipo;
+      inf_id->clase = CLASVAR;
       insertarTS();
       inf_id->ptr_tipo = aux;
       scanner();
@@ -236,6 +274,7 @@ void declaracion_variable(){
   if (sbol->codigo == CCOMA){
       
       int aux = inf_id->ptr_tipo;
+      inf_id->clase = CLASVAR;
       insertarTS();
       inf_id->ptr_tipo = aux;
       scanner();
@@ -243,6 +282,7 @@ void declaracion_variable(){
   }
 
   if (sbol->codigo == CPYCOMA){
+      inf_id->clase = CLASVAR;
       insertarTS();
       scanner();
   }

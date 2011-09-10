@@ -31,8 +31,8 @@
 #define CLASFUNC   3    // identificador de funcion
 #define CLASPAR    4    // identificador de parametro formal
 
-
-
+#define PAR_VALOR 'V'
+#define PAR_REFERENCIA 'R'
 
 /*
 
@@ -60,7 +60,7 @@
 
 
 // ------------------------- STC_TS ---------------------------
-//   Estructura propia de: variables (anonimas), subrutinas y par metros
+//   Estructura propia de: variables (anonimas), subrutinas y parï¿½metros
 
 
 typedef struct {
@@ -98,7 +98,7 @@ typedef struct {
 
 
 // ------------------------ ENTRADA_TS ---------------------------
-//          Estructura de una entrada en la tabla de s¡mbolos
+//          Estructura de una entrada en la tabla de sï¿½mbolos
 
 typedef struct{
 
@@ -120,7 +120,7 @@ typedef struct{
 
 
 // ---------------------------- TIPO_TS -----------------------------
-//          Estructura que define el tipo de la tabla de s¡mbolos
+//          Estructura que define el tipo de la tabla de sï¿½mbolos
 
 typedef struct {
 

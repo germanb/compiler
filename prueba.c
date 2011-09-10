@@ -1,7 +1,7 @@
 int c, d = 2;
 void e;
 int f [1], g[100], h;
-void lal(int pepe){
+void lal(int pep[], int & dos, int tres){
     int p = 1;
 
 };

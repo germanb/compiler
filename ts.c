@@ -187,6 +187,8 @@ int hash(char id[])
 
 int insertarTS()   // la inf. del identif. esta en inf_id que es global
 {
+    inf_id->desc.nivel = topeTB +1 ;
+
     int i,h;
     h = hash(inf_id->nbre);
     if ( th[h] != NIL )
@@ -299,7 +301,7 @@ void show_ts(){
     int i = 0;
     printf("Tabla de simbolos:\n");
     for(i = 0; i<= topeTS; i++){
-        printf("entrada %d con nombre %s  Tipo %s \n",i,ts[i].ets->nbre, ts[ts[i].ets->ptr_tipo].ets->nbre);
+        printf("entrada %d con nombre %s  Tipo %s Nivel %d \n",i,ts[i].ets->nbre, ts[ts[i].ets->ptr_tipo].ets->nbre, ts[i].ets->desc.nivel);
     }
 }
 
