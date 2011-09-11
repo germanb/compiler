@@ -613,7 +613,14 @@ void termino() {
 void factor() {
 
   switch (sbol->codigo){
-  case CIDENT: if (sbol->lexema[0]=='f') llamada_funcion();
+  case CIDENT:
+      if (en_tabla(sbol->lexema) == NIL){
+          error_handler(33);
+          strcpy(inf_id->nbre,sbol->lexema);
+          inf_id->ptr_tipo = en_tabla("TIPOERROR");
+    
+      }
+      if (sbol->lexema[0]=='f') llamada_funcion();
                else variable();
   /************ Sacar ************/
              break; 
@@ -635,26 +642,42 @@ void factor() {
 	      expresion();
 	      break;
   }
-  default: error_handler(8);
+  default: error_handler(31);
   }  
 
 }
 
 void variable(){
-
-  if (sbol->codigo == CIDENT) scanner();
+  char tipo_aux [TAM_ID];
+  if (sbol->codigo == CIDENT){
+      strcpy(tipo_aux , sbol->lexema);
+      scanner();
+  }
   else error_handler(8);
 
   /* el alumno debera verificar con una consulta a TS 
     si, siendo la variable un arreglo, corresponde o no 
     verificar la presencia del subindice */
  if (sbol->codigo == CCOR_ABR){
+   if(inf_id->ptr_tipo == en_tabla("TIPOERROR")){
+       inf_id->ptr_tipo = en_tabla("TIPOARREGLO");
+       insertarTS();
+   }
+   if(ts[en_tabla(tipo_aux)].ets->ptr_tipo != en_tabla("TIPOARREGLO")){
+       error_handler(32);
+   }
    scanner();
    expresion();
    if (sbol->codigo == CCOR_CIE) scanner();
    else error_handler(8);
+ }else{
+     if(inf_id->ptr_tipo == en_tabla("TIPOERROR")){
+        insertarTS();
+    }
+     if(ts[en_tabla(tipo_aux)].ets->ptr_tipo == en_tabla("TIPOARREGLO")){
+          error_handler(40);
+     }
  }
-
 }
 void llamada_funcion() {
 

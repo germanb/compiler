@@ -1,6 +1,6 @@
-int c, d = 2;
-void e;
+void a(){
+    g[] = 4;
+g = 3;
 
- main(){
 
 }
