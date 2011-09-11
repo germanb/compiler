@@ -249,11 +249,16 @@ void lista_declaraciones_init(){
   else error_handler(8);
   
   declarador_init();
-
+  inf_id->clase = CLASVAR;
+  int aux;
+  if(inf_id->ptr_tipo == en_tabla("TIPOARREGLO")){
+    aux = inf_id->desc.part_var.arr.ptero_tipo_base;
+  }else{
+    aux = inf_id->ptr_tipo;
+  }
+  insertarTS();
   while (sbol->codigo == CCOMA) {
-      int aux = inf_id->ptr_tipo;
-      inf_id->clase = CLASVAR;
-      insertarTS();
+
       inf_id->ptr_tipo = aux;
       scanner();
 
@@ -264,6 +269,7 @@ void lista_declaraciones_init(){
     else error_handler(8);
   
     declarador_init();
+    insertarTS();
   }
 
 }
@@ -303,11 +309,11 @@ void declarador_init(){
       }
       case CCOR_ABR:{
               scanner();
+              inf_id->desc.part_var.arr.ptero_tipo_base = inf_id->ptr_tipo;
+              inf_id->ptr_tipo = en_tabla("TIPOARREGLO");
 	      if (sbol->codigo == CCONS_ENT)
               {
                   inf_id->desc.part_var.arr.cant_elem = sbol->lexema;
-                  inf_id->desc.part_var.arr.ptero_tipo_base = inf_id->ptr_tipo;
-                  inf_id->ptr_tipo = en_tabla("TIPOARREGLO");
                   constante();
               }
 	      if (sbol->codigo == CCOR_CIE) scanner();

@@ -302,26 +302,26 @@ void show_ts(){
    printf("Tabla de simbolos:\n");
    for(i = 0; i<= topeTS; i++){
 
-       printf("[%d]\t %s type: %s ",
+       printf("[%d]\t | name:%s | type:%s ",
                i,
                ts[i].ets->nbre,
                ts[ts[i].ets->ptr_tipo].ets->nbre);
 
        switch(ts[i].ets->clase){
-           case CLASTYPE: printf("TYPE");break;
+           case CLASTYPE: printf("| class:TYPE");break;
            case CLASFUNC:
-               printf("FUNC: ");
+               printf("| class:FUNC ");
                tipo_inf_res *aux = ts[i].ets->desc.part_var.sub.ptr_inf_res;
                while(aux!=NULL){
-                   printf("%c %s, ", aux->tipo_pje, ts[aux->ptero_tipo].ets->nbre);
+                   printf("| tipo_pje:%c | ptero_tipo:%s ", aux->tipo_pje, ts[aux->ptero_tipo].ets->nbre);
                    aux = aux->ptr_sig;
                }
                break;
-           case CLASVAR: printf("VAR"); break;
+           case CLASVAR: printf("| class:VAR"); break;
 
-           case CLASPAR: printf("PAR"); break;
+           case CLASPAR: printf("| class:PAR"); break;
        }
-       printf("\n");
+       printf("| level %d \n",ts[i].ets->desc.nivel );
    }
 }
 
