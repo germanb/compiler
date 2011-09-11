@@ -57,6 +57,8 @@ token *sbol;
 
 extern FILE *yyin;
 
+//flag para ver si tiene return una funcion
+int return_flag;
 
 void scanner() {
   int i;
@@ -106,10 +108,25 @@ int main( int argc,char *argv[]) {
 
   scanner();
   unidad_traduccion();
+  int main_pos = en_tabla("main");
+  if(en_tabla("main") == NIL){
+      error_handler(15);
+      error_handler(COD_IMP_ERRORES);
+  }else{
+      entrada_TS main = * ts[main_pos].ets;
+      if(main.desc.part_var.sub.cant_par){
+          error_handler(36);
+      }
+      if(main.ptr_tipo != en_tabla("void")){
+          error_handler(35);    
+      }
+      error_handler(COD_IMP_ERRORES);
+  }
 
   show_ts();
 
   if (sbol->codigo != CEOF) error_handler(8);
+  
   
 }
 
@@ -165,21 +182,25 @@ void definicion_funcion(){
 
   inf_id_aux = inf_id;
   inf_id = (entrada_TS *) calloc (1,sizeof(entrada_TS));
-
+  int void_flag;
   if (sbol->codigo == CVOID || sbol->codigo == CCHAR ||
       sbol->codigo == CINT || sbol->codigo == CFLOAT) {
+      void_flag = (sbol->codigo == CVOID);
       lista_declaraciones_param();
   }
 
   if (sbol->codigo == CPAR_CIE) scanner();
   else error_handler(20);
-
+  return_flag = 0;
   proposicion_compuesta();
 
   popTB();
 
   inf_id = inf_id_aux;
   inf_id->clase = CLASFUNC;
+  if (!void_flag && !return_flag) {
+      error_handler(37);
+  }
   insertarTS();
 }
 
@@ -520,7 +541,7 @@ void proposicion_retorno() {
   expresion();
   if (sbol->codigo == CPYCOMA) scanner();
   else error_handler(8);
-
+  return_flag = 1;
 }
 
 
