@@ -298,10 +298,30 @@ int pushTS(int s, entrada_TS *ptr)
 
 
 void show_ts(){
-    int i = 0;
-    printf("Tabla de simbolos:\n");
-    for(i = 0; i<= topeTS; i++){
-        printf("entrada %d con nombre %s  Tipo %s Nivel %d \n",i,ts[i].ets->nbre, ts[ts[i].ets->ptr_tipo].ets->nbre, ts[i].ets->desc.nivel);
-    }
+   int i = 0;
+   printf("Tabla de simbolos:\n");
+   for(i = 0; i<= topeTS; i++){
+
+       printf("[%d]\t %s type: %s ",
+               i,
+               ts[i].ets->nbre,
+               ts[ts[i].ets->ptr_tipo].ets->nbre);
+
+       switch(ts[i].ets->clase){
+           case CLASTYPE: printf("TYPE");break;
+           case CLASFUNC:
+               printf("FUNC: ");
+               tipo_inf_res *aux = ts[i].ets->desc.part_var.sub.ptr_inf_res;
+               while(aux!=NULL){
+                   printf("%c %s, ", aux->tipo_pje, ts[aux->ptero_tipo].ets->nbre);
+                   aux = aux->ptr_sig;
+               }
+               break;
+           case CLASVAR: printf("VAR"); break;
+
+           case CLASPAR: printf("PAR"); break;
+       }
+       printf("\n");
+   }
 }
 

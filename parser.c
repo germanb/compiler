@@ -163,22 +163,24 @@ void definicion_funcion(){
   if (sbol->codigo == CPAR_ABR) scanner();
   else error_handler(19);
 
+  inf_id_aux = inf_id;
+  inf_id = (entrada_TS *) calloc (1,sizeof(entrada_TS));
+
   if (sbol->codigo == CVOID || sbol->codigo == CCHAR ||
       sbol->codigo == CINT || sbol->codigo == CFLOAT) {
-      inf_id_aux = inf_id;
-      inf_id = (entrada_TS *) calloc (1,sizeof(entrada_TS));
       lista_declaraciones_param();
-      inf_id = inf_id_aux;
   }
 
   if (sbol->codigo == CPAR_CIE) scanner();
   else error_handler(20);
+
+  proposicion_compuesta();
+
   popTB();
+
+  inf_id = inf_id_aux;
   inf_id->clase = CLASFUNC;
   insertarTS();
-  pushTB();
-  proposicion_compuesta();
-  popTB();
 }
 
 void lista_declaraciones_param(){
@@ -384,7 +386,11 @@ void declaracion(){
 
   lista_declaraciones_init();
 
-  if (sbol->codigo == CPYCOMA) scanner();
+  if (sbol->codigo == CPYCOMA){
+      inf_id->clase = CLASVAR;
+      insertarTS();
+      scanner();
+  }
   else error_handler(8);
 
 }
@@ -409,7 +415,7 @@ void lista_proposiciones() {
 void proposicion(){
 
   switch (sbol->codigo) {
-  case CLLA_ABR: proposicion_compuesta(); break;
+  case CLLA_ABR: pushTB(); proposicion_compuesta(); popTB();break;
   case CWHILE: proposicion_iteracion(); break;
   case CIF: proposicion_seleccion(); break;
   case CIN:
