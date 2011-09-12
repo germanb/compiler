@@ -468,7 +468,7 @@ void proposicion_iteracion() {
   else error_handler(8);
 
   if (sbol->codigo == CPAR_ABR) scanner();
-  else error_handler(8);
+  else error_handler(19);
 
   expresion();
 
@@ -486,7 +486,7 @@ void proposicion_seleccion() {
   else error_handler(8);
 
   if (sbol->codigo == CPAR_ABR) scanner();
-  else error_handler(8);
+  else error_handler(19);
 
   expresion();
 
@@ -556,6 +556,7 @@ void proposicion_expresion(){
     expresion();
 
   if (sbol->codigo == CPYCOMA) scanner();
+  //TODO: aca debemos manejar el error del p6pe
   else error_handler(8);
 }
 
@@ -634,7 +635,7 @@ void factor() {
                  scanner();
 		 expresion();
 		 if (sbol->codigo == CPAR_CIE) scanner();
-		 else error_handler(8);
+		 else error_handler(20);
 		 break;
   }
   case CNEG: {
@@ -685,7 +686,7 @@ void llamada_funcion() {
   else error_handler(8);
 
   if (sbol->codigo == CPAR_ABR) scanner();
-  else error_handler(8);
+  else error_handler(19);
 
   if (sbol->codigo == CMAS || sbol->codigo == CMENOS ||
       sbol->codigo == CIDENT || 
