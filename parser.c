@@ -59,6 +59,7 @@ extern FILE *yyin;
 
 //flag para ver si tiene return una funcion
 int return_flag;
+int function_call_flag = 0;
 
 void scanner() {
   int i;
@@ -80,20 +81,21 @@ void scanner() {
 
 int main( int argc,char *argv[]) {
 
+    //AGREGAR -C Y -E
+
   /* el alumno debera inicializar la variable yyin segun corresponda */
-   
   linea = (char *) malloc (2);
   strcat(linea, "");
 
   nro_linea=0;
     if (argc == 100) {
-//  if (argc != 1) {
+ // if (argc != 3) {
     error_handler(6);
     error_handler(COD_IMP_ERRORES);
     exit(1);  
   }
   else {
- //   if ((yyin = fopen(argv[1], "r" )) == NULL) {
+ //   if ((yyin = fopen(argv[2], "r" )) == NULL) {
       if ((yyin = fopen("prueba.c", "r" )) == NULL) {
       error_handler(7);
       error_handler(COD_IMP_ERRORES);
@@ -180,28 +182,35 @@ void definicion_funcion(){
   if (sbol->codigo == CPAR_ABR) scanner();
   else error_handler(19);
 
+  int void_flag = (inf_id->ptr_tipo == en_tabla("void"));
+
   inf_id_aux = inf_id;
   inf_id = (entrada_TS *) calloc (1,sizeof(entrada_TS));
-  int void_flag;
   if (sbol->codigo == CVOID || sbol->codigo == CCHAR ||
       sbol->codigo == CINT || sbol->codigo == CFLOAT) {
-      void_flag = (sbol->codigo == CVOID);
       lista_declaraciones_param();
   }
 
   if (sbol->codigo == CPAR_CIE) scanner();
   else error_handler(20);
-  return_flag = 0;
-  proposicion_compuesta();
 
   popTB();
 
   inf_id = inf_id_aux;
   inf_id->clase = CLASFUNC;
+  insertarTS();
+
+  pushTB();
+
+  return_flag = 0;
+  proposicion_compuesta();
+  pop_nivel();
+  //popTB();
+  
   if (!void_flag && !return_flag) {
       error_handler(37);
   }
-  insertarTS();
+
 }
 
 void lista_declaraciones_param(){
@@ -256,7 +265,11 @@ void declaracion_parametro() {
 
       scanner();
 
-      if (sbol->codigo == CCOR_CIE) scanner();
+      if (sbol->codigo == CCOR_CIE){
+          inf_id->desc.part_var.arr.ptero_tipo_base = inf_id->ptr_tipo;
+          inf_id->ptr_tipo = en_tabla("TIPOARREGLO");
+          scanner();
+      }
       else error_handler(21);
   }
 }
@@ -675,7 +688,9 @@ void variable(){
         insertarTS();
     }
      if(ts[en_tabla(tipo_aux)].ets->ptr_tipo == en_tabla("TIPOARREGLO")){
-          error_handler(40);
+         if(!function_call_flag){
+            error_handler(40);
+         }
      }
  }
 }
@@ -686,6 +701,8 @@ void llamada_funcion() {
 
   if (sbol->codigo == CPAR_ABR) scanner();
   else error_handler(19);
+    
+  function_call_flag = 1;
 
   if (sbol->codigo == CMAS || sbol->codigo == CMENOS ||
       sbol->codigo == CIDENT || 
@@ -697,7 +714,7 @@ void llamada_funcion() {
 
    if (sbol->codigo == CPAR_CIE) scanner();
   else error_handler(20);
-
+  function_call_flag = 0;
 }
 
 void lista_expresiones() {
