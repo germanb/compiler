@@ -317,7 +317,13 @@ void show_ts(){
                    aux = aux->ptr_sig;
                }
                break;
-           case CLASVAR: printf("| class:VAR"); break;
+           case CLASVAR: printf("| class:VAR");
+          
+          // if(strcmp(ts[ts[i].ets->ptr_tipo].ets->nbre, "TIPOARREGLO" ))
+          // {
+               printf("| cant elem %d", ts[i].ets->desc.part_var.arr.cant_elem);
+          // }
+           break;
 
            case CLASPAR: printf("| class:PAR"); break;
        }

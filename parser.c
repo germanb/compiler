@@ -60,7 +60,7 @@ extern FILE *yyin;
 //flag para ver si tiene return una funcion
 int return_flag;
 int function_call_flag = 0;
-
+ int void_flag;
 void scanner() {
   int i;
 
@@ -88,7 +88,6 @@ int main( int argc,char *argv[]) {
   strcat(linea, "");
 
   nro_linea=0;
-  //  if (argc == 100) {
   if (argc != 3) {
     error_handler(6);
     error_handler(COD_IMP_ERRORES);
@@ -181,17 +180,12 @@ void definicion_funcion(){
   if (sbol->codigo == CPAR_ABR) scanner();
   else error_handler(19);
 
-  int void_flag = (inf_id->ptr_tipo == en_tabla("void"));
+  void_flag = (inf_id->ptr_tipo == en_tabla("void"));
 
   inf_id_aux = inf_id;
 
-  //  inf_id = inf_id_aux;
-
   inf_id->clase = CLASFUNC;
   insertarTS();
-
-
-  //inf_id = (entrada_TS *) calloc (1,sizeof(entrada_TS));
 
   pushTB();
   if (sbol->codigo == CVOID || sbol->codigo == CCHAR ||
@@ -205,10 +199,6 @@ void definicion_funcion(){
   return_flag = 0;
   proposicion_compuesta();
   pop_nivel();
-
-  if (!void_flag && !return_flag) {
-      error_handler(37);
-  }
 
 }
 
@@ -345,7 +335,7 @@ void declarador_init(){
               inf_id->ptr_tipo = en_tabla("TIPOARREGLO");
 	      if (sbol->codigo == CCONS_ENT)
               {
-                  inf_id->desc.part_var.arr.cant_elem = sbol->lexema;
+                  inf_id->desc.part_var.arr.cant_elem = atoi(sbol->lexema);
                   constante();
               }
 	      if (sbol->codigo == CCOR_CIE) scanner();
@@ -403,7 +393,12 @@ void proposicion_compuesta(){
 
     lista_proposiciones();
 
-  if (sbol->codigo == CLLA_CIE) scanner();
+  if (sbol->codigo == CLLA_CIE){
+      if (!void_flag && !return_flag) {
+         error_handler(37);
+      }
+      scanner();
+  }
   else error_handler(24);
 
 }
