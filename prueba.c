@@ -1,7 +1,6 @@
 
-char a, b, c;
-int x;
 
- main() {
+ void main() {
+     int prueba = 2;
 }
 
