@@ -61,6 +61,7 @@ extern FILE *yyin;
 //flag para ver si tiene return una funcion
 int return_flag;
 int function_call_flag = 0;
+int ident_not_exists_flag = 0;
  int void_flag;
 void scanner() {
   int i;
@@ -148,17 +149,12 @@ void declaraciones(set folset){
   if (sbol->codigo == CIDENT){
       strcpy(inf_id->nbre,sbol->lexema);
       scanner();
-      especificador_declaracion();
   }
   else {
       error_handler(16);
-      scanner();
-      while (sbol->codigo != CEOF && sbol->codigo != CVOID && sbol->codigo != CCHAR &&
-         sbol->codigo != CINT && sbol->codigo != CFLOAT){
-          scanner();
-      }
+      ident_not_exists_flag = 1;
   }
-  
+  especificador_declaracion();
 }
 
 void especificador_tipo(){
@@ -198,8 +194,12 @@ void definicion_funcion(){
 
   inf_id_aux = inf_id;
 
-  inf_id->clase = CLASFUNC;
-  insertarTS();
+  if(ident_not_exists_flag == 0){
+    inf_id->clase = CLASFUNC;
+    insertarTS();
+  }else{
+      ident_not_exists_flag = 0;
+  }
 
   pushTB();
   if (sbol->codigo == CVOID || sbol->codigo == CCHAR ||
@@ -340,8 +340,12 @@ void declaracion_variable(){
     lista_declaraciones_init();
   }
 
-  inf_id->clase = CLASVAR;
-  insertarTS();
+  if(ident_not_exists_flag == 0){
+    inf_id->clase = CLASVAR;
+    insertarTS();
+  }else{
+      ident_not_exists_flag = 0;
+  }
 
   if (sbol->codigo == CPYCOMA){
       scanner();
