@@ -1,9 +1,16 @@
 
-char a, b, c;
-int x;
+void main() {
 
+int i=0, leer;
 
- main() {
+cout << "Ingrese un numero cualquiera: ";
+cin >> leer;
+
+cout << "\n\n Los digitos son los siguientes";
+
+while (i < 10) {
+   cout << "El numero es: " << i;
+   i= i+1;
 }
 
- int d;
+}

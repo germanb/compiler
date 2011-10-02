@@ -219,6 +219,9 @@ void definicion_funcion(){
      error_handler(37);
   }
 
+  if (sbol->codigo == CLLA_CIE){
+    scanner();
+  }
   pop_nivel();
 
 }
@@ -414,11 +417,10 @@ void proposicion_compuesta(){
 
     lista_proposiciones();
 
-  if (sbol->codigo == CLLA_CIE){
-      scanner();
+  if (sbol->codigo != CLLA_CIE){
+      error_handler(24);
   }
-  else error_handler(24);
-
+  //PONEMOS SCANNER AFUERA PARA QUE IMPRIMA BIEN LOS ERRORES!!!
 }
 void lista_declaraciones() {
 
@@ -467,7 +469,14 @@ void lista_proposiciones() {
 void proposicion(){
 
   switch (sbol->codigo) {
-  case CLLA_ABR: pushTB(); proposicion_compuesta(); popTB();break;
+  case CLLA_ABR:
+      pushTB();
+      proposicion_compuesta();
+      if (sbol->codigo == CLLA_CIE){
+        scanner();
+      }
+      popTB();
+      break;
   case CWHILE: proposicion_iteracion(); break;
   case CIF: proposicion_seleccion(); break;
   case CIN:
