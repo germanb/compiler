@@ -10,11 +10,12 @@
 #include "codigos.h"
 #include "var_globales.h"
 #include "ts.h"
+#include "set.c"
 
 /*********** prototipos *************/
 
-void unidad_traduccion();
-void declaraciones();
+void unidad_traduccion(set folset);
+void declaraciones(set folset);
 void especificador_tipo();
 void especificador_declaracion();
 void definicion_funcion();
@@ -45,7 +46,7 @@ void termino();
 void factor();
 void llamada_funcion();
 void lista_expresiones();
-
+void test(set cjto1, set cjto2, int n);
 
 void scanner ();
 
@@ -115,7 +116,10 @@ int main( int argc,char *argv[]) {
   inic_tablas();
 
   scanner();
-  unidad_traduccion();
+
+  set folset = cons(NADA,CEOF);
+
+  unidad_traduccion(folset);
 
   if(en_tabla("main") == NIL){
       error_handler(15);
@@ -130,14 +134,16 @@ int main( int argc,char *argv[]) {
 
 /********* funciones del parser ***********/
 
-void unidad_traduccion(){
+void unidad_traduccion(set folset){
+
+  test(une(folset,firsts[UT]),cons(NADA,NADA),50);
 
   while (sbol->codigo == CVOID || sbol->codigo == CCHAR ||
          sbol->codigo == CINT || sbol->codigo == CFLOAT)
-    declaraciones();
+    declaraciones(une(folset,firsts[DE]));
 }
 
-void declaraciones(){
+void declaraciones(set folset){
   especificador_tipo();
   if (sbol->codigo == CIDENT){
       strcpy(inf_id->nbre,sbol->lexema);
@@ -764,6 +770,17 @@ void constante(){
   default: scanner(); /*f_error(); aca va f_error, faltan los algoritmos de conversion a las constantes numericas. */
   }
 
+}
+
+void test(set cjto1, set cjto2, int n){
+    if (!in(sbol->codigo, cjto1)){
+        error_handler(n);
+        cjto1 = une(cjto1,cjto2);
+        while (!in(sbol->codigo, cjto1)) // ahora cjto1 es el conjunto de
+        {
+             scanner();
+        }
+    }
 }
 
 

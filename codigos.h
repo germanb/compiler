@@ -53,6 +53,68 @@
 #define SEGUIR     (UNO<<20|FLAG)
 
 
+//UNIDAD DE TRADUCCION
+#define UT                      0
+//DECLARACIONES
+#define DE                      1
+//ESPECIFICADOR DE TIPO
+#define ET                      2
+//ESPECIFICADOR DE DECLARACION
+#define ED                      3
+//DEFINICION DE FUNCION
+#define DF              4
+//DECLARACION DE VBLE
+#define DV                      5
+//LISTA DECLARACION DE PARAMETROS
+#define LDP             6
+//DECLARACION DE PARAMETRO
+#define DP              7
+//DECLARADOR INIT
+#define DI                      8
+//LISTA DE DECLARADORES INIT
+#define LDI                     9
+//CONSTANTE
+#define C            10
+//LISTA DE INICIALIZADORES
+#define LI                              11
+//LISTA DE PROPOSICIONES
+#define LP              12
+//LISTA DE DECLARACIONES
+#define LD              13
+//DECLARACION
+#define D               14
+//PROPOSICION
+#define P               15
+//PROPOSICION EXPRESION
+#define PE                      16
+//PROPOSICION COMPUESTA
+#define PC                      17
+//PROPOSICION SELECCION
+#define PS                      18
+//PROPOSICION ITERACION
+#define PI                      19
+//PROPOSICION DE ENTRADA SALIDA
+#define PES             20
+//PROPOSICION RETORNO
+#define PR                      21
+//VARIABLE
+#define V               22
+//EXPRESION
+#define E               23
+//EXPRESIONN SIMPLE
+#define ES                      24
+//RELACION
+#define R                       25
+//TERMINO
+#define T                       26
+//FACTOR
+#define F               27
+//LLAMADA A FUNCION
+#define LF                      28
+//LISTA DE EXPRESIONES
+#define LE              29
+
+
 
 
 
