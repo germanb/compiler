@@ -65,14 +65,20 @@ void scanner() {
   int i;
 
   for (;(i=yylex())!= NADA && sbol->codigo == SEGUIR;);
-  if (i == NADA) sbol->codigo = CEOF;
+  if (i == NADA){
+      nro_linea++;
+      sbol->codigo = CEOF;
+  }else{
+    liberar = linea;
+    linea = (char *) malloc (strlen(linea) + strlen (token1.lexema) + 3);
+    strcpy(linea, liberar);
+    strcat(linea, token1.lexema);
+    free ( (void *) liberar);
+  }
+
   /* yylex retorna 0 si llego a fin de archivo */
 
-  liberar = linea;
-  linea = (char *) malloc (strlen(linea) + strlen (token1.lexema) + 3);
-  strcpy(linea, liberar);
-  strcat(linea, token1.lexema);
-  free ( (void *) liberar);
+
 
   /* El alumno debera dar una solucion al problema que las constantes
     enteras y flotantes son entregadas como strings al parser */
@@ -88,14 +94,15 @@ int main( int argc,char *argv[]) {
   strcat(linea, "");
 
   nro_linea=0;
-  if (argc != 3) {
+   if (argc == 30) {
+ // if (argc != 3) {
     error_handler(6);
     error_handler(COD_IMP_ERRORES);
     exit(1);
   }
   else {
-    if ((yyin = fopen(argv[2], "r" )) == NULL) {
- //     if ((yyin = fopen("prueba.c", "r" )) == NULL) {
+ //   if ((yyin = fopen(argv[2], "r" )) == NULL) {
+      if ((yyin = fopen("prueba.c", "r" )) == NULL) {
       error_handler(7);
       error_handler(COD_IMP_ERRORES);
       exit(1);
@@ -109,26 +116,15 @@ int main( int argc,char *argv[]) {
 
   scanner();
   unidad_traduccion();
-  int main_pos = en_tabla("main");
+
   if(en_tabla("main") == NIL){
       error_handler(15);
-      error_handler(COD_IMP_ERRORES);
-  }else{
-      entrada_TS main = * ts[main_pos].ets;
-      if(main.desc.part_var.sub.cant_par){
-          error_handler(36);
-      }
-      if(main.ptr_tipo != en_tabla("void")){
-          error_handler(35);
-      }
-      error_handler(COD_IMP_ERRORES);
   }
 
  // show_ts();
 
-  if (sbol->codigo != CEOF) error_handler(8);
-
-
+ // if (sbol->codigo != CEOF) error_handler(8);
+  error_handler(COD_IMP_ERRORES);
 }
 
 
@@ -146,9 +142,17 @@ void declaraciones(){
   if (sbol->codigo == CIDENT){
       strcpy(inf_id->nbre,sbol->lexema);
       scanner();
+      especificador_declaracion();
   }
-  else {error_handler(16);scanner();}
-  especificador_declaracion();
+  else {
+      error_handler(16);
+      scanner();
+      while (sbol->codigo != CEOF && sbol->codigo != CVOID && sbol->codigo != CCHAR &&
+         sbol->codigo != CINT && sbol->codigo != CFLOAT){
+          scanner();
+      }
+  }
+  
 }
 
 void especificador_tipo(){
@@ -180,6 +184,10 @@ void definicion_funcion(){
   if (sbol->codigo == CPAR_ABR) scanner();
   else error_handler(19);
 
+  if(!strcmp(inf_id->nbre,"main") && (inf_id->ptr_tipo != en_tabla("void"))){
+     error_handler(35);
+  }
+
   void_flag = (inf_id->ptr_tipo == en_tabla("void"));
 
   inf_id_aux = inf_id;
@@ -191,6 +199,14 @@ void definicion_funcion(){
   if (sbol->codigo == CVOID || sbol->codigo == CCHAR ||
       sbol->codigo == CINT || sbol->codigo == CFLOAT) {
       lista_declaraciones_param();
+
+      int main_pos = en_tabla("main");
+      if(main_pos != NIL){
+        entrada_TS main = * ts[main_pos].ets;
+        if(main.desc.part_var.sub.cant_par){
+            error_handler(36);
+        }
+      }
   }
 
   if (sbol->codigo == CPAR_CIE) scanner();
@@ -198,6 +214,11 @@ void definicion_funcion(){
 
   return_flag = 0;
   proposicion_compuesta();
+
+  if (!void_flag && !return_flag) {
+     error_handler(37);
+  }
+
   pop_nivel();
 
 }
@@ -394,9 +415,6 @@ void proposicion_compuesta(){
     lista_proposiciones();
 
   if (sbol->codigo == CLLA_CIE){
-      if (!void_flag && !return_flag) {
-         error_handler(37);
-      }
       scanner();
   }
   else error_handler(24);
@@ -627,12 +645,17 @@ void factor() {
           inf_id->ptr_tipo = en_tabla("TIPOERROR");
 
       }
-      if (sbol->lexema[0]=='f') llamada_funcion();
-               else variable();
-  /************ Sacar ************/
-             break;
-                 /* el alumno debera evaluar con consulta a TS
-                  si bifurca a variable o llamada a funcion */
+
+      int function_pos = en_tabla(sbol->lexema);
+      if(function_pos != NIL){
+        entrada_TS function = * ts[function_pos].ets;
+        if(function.clase == CLASFUNC){
+            llamada_funcion();
+            break;
+        }
+      }
+      variable();
+      break;
   case CCONS_ENT:
   case CCONS_FLO:
   case CCONS_CAR: constante(); break;
