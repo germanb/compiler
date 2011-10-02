@@ -94,15 +94,15 @@ int main( int argc,char *argv[]) {
   strcat(linea, "");
 
   nro_linea=0;
-   if (argc == 30) {
- // if (argc != 3) {
+ //  if (argc == 30) {
+  if (argc != 3) {
     error_handler(6);
     error_handler(COD_IMP_ERRORES);
     exit(1);
   }
   else {
- //   if ((yyin = fopen(argv[2], "r" )) == NULL) {
-      if ((yyin = fopen("prueba.c", "r" )) == NULL) {
+    if ((yyin = fopen(argv[2], "r" )) == NULL) {
+ //     if ((yyin = fopen("prueba.c", "r" )) == NULL) {
       error_handler(7);
       error_handler(COD_IMP_ERRORES);
       exit(1);
