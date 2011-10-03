@@ -68,8 +68,8 @@ void initFirsts(){
   firsts[UT].p1 = CVOID|CINT|CFLOAT|CCHAR;
   firsts[UT].p2 = NADA;
 
-  firsts[DS].p1 = CVOID|CINT|CFLOAT|CCHAR;
-  firsts[DS].p2 = NADA;
+  firsts[DE].p1 = CVOID|CINT|CFLOAT|CCHAR;
+  firsts[DE].p2 = NADA;
 
   firsts[ET].p1 = CVOID|CINT|CFLOAT|CCHAR;
   firsts[ET].p2 = NADA;

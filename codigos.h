@@ -101,7 +101,7 @@
 #define V               22
 //EXPRESION
 #define E               23
-//EXPRESIONN SIMPLE
+//EXPRESION SIMPLE
 #define ES                      24
 //RELACION
 #define R                       25
