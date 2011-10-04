@@ -95,15 +95,15 @@ int main( int argc,char *argv[]) {
   strcat(linea, "");
 
   nro_linea=0;
- //  if (argc == 30) {
-  if (argc != 3) {
+   if (argc == 30) {
+ // if (argc != 3) {
     error_handler(6);
     error_handler(COD_IMP_ERRORES);
     exit(1);
   }
   else {
-    if ((yyin = fopen(argv[2], "r" )) == NULL) {
- //     if ((yyin = fopen("prueba.c", "r" )) == NULL) {
+ //   if ((yyin = fopen(argv[2], "r" )) == NULL) {
+      if ((yyin = fopen("prueba.c", "r" )) == NULL) {
       error_handler(7);
       error_handler(COD_IMP_ERRORES);
       exit(1);
@@ -278,9 +278,10 @@ void declaracion_parametro() {
 
       scanner();
 
+      inf_id->desc.part_var.arr.ptero_tipo_base = inf_id->ptr_tipo;
+      inf_id->ptr_tipo = en_tabla("TIPOARREGLO");
+
       if (sbol->codigo == CCOR_CIE){
-          inf_id->desc.part_var.arr.ptero_tipo_base = inf_id->ptr_tipo;
-          inf_id->ptr_tipo = en_tabla("TIPOARREGLO");
           scanner();
       }
       else error_handler(21);
@@ -765,7 +766,7 @@ void constante(){
   case CCONS_ENT: scanner(); break;
   case CCONS_FLO: scanner(); break;
   case CCONS_CAR: scanner(); break;
-  default: scanner(); /*f_error(); aca va f_error, faltan los algoritmos de conversion a las constantes numericas. */
+  default: error_handler(38); //scanner(); /*f_error(); aca va f_error, faltan los algoritmos de conversion a las constantes numericas. */
   }
 
 }
