@@ -302,9 +302,10 @@ void declaracion_parametro(set folset) {
 
       scanner();
 
+      inf_id->desc.part_var.arr.ptero_tipo_base = inf_id->ptr_tipo;
+      inf_id->ptr_tipo = en_tabla("TIPOARREGLO");
+
       if (sbol->codigo == CCOR_CIE){
-          inf_id->desc.part_var.arr.ptero_tipo_base = inf_id->ptr_tipo;
-          inf_id->ptr_tipo = en_tabla("TIPOARREGLO");
           scanner();
       }
       else error_handler(21);
@@ -842,7 +843,7 @@ void constante(set folset){
   case CCONS_ENT: scanner(); break;
   case CCONS_FLO: scanner(); break;
   case CCONS_CAR: scanner(); break;
-  default: {error_handler(38);}// scanner(); /*f_error(); aca va f_error, faltan los algoritmos de conversion a las constantes numericas. */
+  default: error_handler(38); //scanner(); /*f_error(); aca va f_error, faltan los algoritmos de conversion a las constantes numericas. */
   }
   test(folset,cons(NADA,NADA),74);
 }
