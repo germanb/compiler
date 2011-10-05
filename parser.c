@@ -11,6 +11,7 @@
 #include "var_globales.h"
 #include "ts.h"
 #include "set.c"
+#include "error.h"
 
 /*********** prototipos *************/
 
@@ -211,7 +212,8 @@ void definicion_funcion(set folset){
 
   pushTB();
   if (sbol->codigo == CVOID || sbol->codigo == CCHAR ||
-      sbol->codigo == CINT || sbol->codigo == CFLOAT) {
+      sbol->codigo == CINT || sbol->codigo == CFLOAT || sbol->codigo == CIDENT || sbol->codigo == CAMPER ) {
+
       lista_declaraciones_param(une(folset, une(firsts[PC], cons(CPAR_CIE,NADA))));
 
       int main_pos = en_tabla("main");
@@ -237,7 +239,9 @@ void definicion_funcion(set folset){
     scanner();
   }
   pop_nivel();
-  //TODO, va test?
+
+  //por que sacamos el scanner de proposicion compuesta pongo el test aca
+  test(folset,cons(NADA,NADA),61);
 
 }
 
@@ -252,9 +256,14 @@ void lista_declaraciones_param(set folset){
   inf_id_aux->desc.part_var.sub.cant_par = 1;
   inf_id->clase = CLASPAR;
   insertarTS();
-  while (sbol->codigo ==CCOMA) {
-      scanner();
+  while (sbol->codigo ==CCOMA || in(sbol->codigo, firsts[DP])) {
 
+      if(in(sbol->codigo, firsts[DP])){
+          error_handler(75);
+      }else{
+           scanner();
+      }
+      
       declaracion_parametro(une(folset,une(cons(CCOMA,NADA),firsts[DP])));
       tipo_inf_res * eslabon = (tipo_inf_res *) calloc (1,sizeof(tipo_inf_res));
       eslabon->ptero_tipo = inf_id->ptr_tipo;
@@ -274,7 +283,7 @@ void lista_declaraciones_param(set folset){
 
 void declaracion_parametro(set folset) {
 
-  especificador_tipo(une(une(folset,firsts[ET]),cons(CAMPER|CCOR_ABR|CCOR_CIE,CIDENT)));
+  especificador_tipo(une(folset,cons(CAMPER|CCOR_ABR|CCOR_CIE,CIDENT)));
 
   if (sbol->codigo == CAMPER){
       inf_id->desc.part_var.tipo_pje = PAR_REFERENCIA;
@@ -305,8 +314,7 @@ void declaracion_parametro(set folset) {
 }
 
 void lista_declaraciones_init(set folset){
-//TODO pensamos que deberia ir ',' , first de declarador init y cident
-  test(firsts[LDI],folset,56);
+  test(firsts[LDI],une(une(folset,firsts[DI]),cons(CCOMA,CIDENT)),57);
 
   if (sbol->codigo == CIDENT){
       strcpy(inf_id->nbre,sbol->lexema);
@@ -371,6 +379,11 @@ void declaracion_variable(set folset){
 
 void declarador_init(set folset){
   test(une(folset,firsts[DI]), une(firsts[C],une(firsts[LI],une(folset,cons(CCOR_CIE|CLLA_ABR|CLLA_CIE, CASIGNAC)))),58);
+
+  if(in(sbol->codigo,firsts[C])){
+	error_handler(79);
+	constante(folset);
+  }else{
   switch (sbol->codigo) {
       case CASIGNAC:{
                scanner();
@@ -406,14 +419,18 @@ void declarador_init(set folset){
       }
   }
 }
-
+ test(folset,cons(NADA,NADA),59);
+}
 void lista_inicializadores(set folset) {
 
   constante(une(folset, une(cons(CCOMA,NADA),firsts[C])));
 
-  while (sbol->codigo == CCOMA) {
-    scanner();
-
+  while (sbol->codigo == CCOMA || in(sbol->codigo,firsts[C])) {
+      if(in(sbol->codigo,firsts[C])){
+          error_handler(75);
+      }else{
+          scanner();
+      }
     constante(une(folset, une(cons(CCOMA,NADA),firsts[C])));
   }
 
@@ -503,6 +520,8 @@ void proposicion(set folset){
         scanner();
       }
       popTB();
+      //por que sacamos el scanner de proposicion compuesta pongo el test aca
+      test(folset,cons(NADA,NADA),61);
       break;
   case CWHILE: proposicion_iteracion(folset); break;
   case CIF: proposicion_seleccion(folset); break;
@@ -631,6 +650,11 @@ void expresion(set folset) {
 
   expresion_simple(une(une(une(folset,firsts[R]),firsts[E]),cons(CASIGNAC,NADA)));
 
+  if(in(sbol->codigo,firsts[E])){
+      error_handler(78);
+      expresion(folset);
+  }else{
+
   switch (sbol->codigo) {
   case CASIGNAC:{
                scanner();
@@ -648,6 +672,7 @@ void expresion(set folset) {
 	      break;
   }
   }
+  }
 }
 
 
@@ -661,8 +686,13 @@ void expresion_simple(set folset) {
 
   while (sbol->codigo == CMAS || sbol->codigo == CMENOS || sbol->codigo == COR)
   {
-    scanner();
-    termino(folset);
+    if(in(sbol->codigo, firsts[T])){
+        error_handler(78);
+        termino(folset);
+    }else{
+        scanner();
+        termino(folset);
+    }
   }
 
 }
@@ -673,7 +703,11 @@ void termino(set folset) {
 
   while (sbol->codigo == CMULT || sbol->codigo == CDIV || sbol->codigo == CAND)
   {
-    scanner();
+    	if(in(sbol->codigo,firsts[F])){
+              error_handler(78);
+	}else{
+	    scanner();
+	}
     //TODO EN TERMINO, EXP SIMPLE.. revisar si va folset solo
     factor(folset);
   }
@@ -727,6 +761,8 @@ void factor(set folset) {
 }
 
 void variable(set folset){
+  test(firsts[V],folset,70);
+
   char tipo_aux [TAM_ID] = "";
   if (sbol->codigo == CIDENT){
       strcpy(tipo_aux , sbol->lexema);
@@ -753,7 +789,10 @@ void variable(set folset){
      if(inf_id->ptr_tipo == en_tabla("TIPOERROR")){
         insertarTS();
     }
-     if(strcmp(tipo_aux,"") != 0 && ts[en_tabla(tipo_aux)].ets->ptr_tipo == en_tabla("TIPOARREGLO")){
+
+     if(en_tabla(tipo_aux) == NIL){
+         error_handler(33);
+     }else if(strcmp(tipo_aux,"") != 0  && ts[en_tabla(tipo_aux)].ets->ptr_tipo == en_tabla("TIPOARREGLO")){
          if(!function_call_flag){
             error_handler(40);
          }
@@ -805,7 +844,7 @@ void constante(set folset){
   case CCONS_ENT: scanner(); break;
   case CCONS_FLO: scanner(); break;
   case CCONS_CAR: scanner(); break;
-  default: scanner(); /*f_error(); aca va f_error, faltan los algoritmos de conversion a las constantes numericas. */
+  default: {error_handler(38);}// scanner(); /*f_error(); aca va f_error, faltan los algoritmos de conversion a las constantes numericas. */
   }
   test(folset,cons(NADA,NADA),74);
 }
