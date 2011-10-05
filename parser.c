@@ -97,15 +97,15 @@ int main( int argc,char *argv[]) {
   strcat(linea, "");
 
   nro_linea=0;
-   if (argc == 30) {
- // if (argc != 3) {
+ //  if (argc == 30) {
+  if (argc != 3) {
     error_handler(6);
     error_handler(COD_IMP_ERRORES);
     exit(1);
   }
   else {
- //   if ((yyin = fopen(argv[2], "r" )) == NULL) {
-      if ((yyin = fopen("prueba.c", "r" )) == NULL) {
+    if ((yyin = fopen(argv[2], "r" )) == NULL) {
+ //     if ((yyin = fopen("prueba.c", "r" )) == NULL) {
       error_handler(7);
       error_handler(COD_IMP_ERRORES);
       exit(1);
@@ -309,7 +309,6 @@ void declaracion_parametro(set folset) {
       }
       else error_handler(21);
   }
-//TODO va la coma?
   test(folset,cons(CCOMA,NADA),55);
 }
 
@@ -438,7 +437,6 @@ void lista_inicializadores(set folset) {
 
 
 void proposicion_compuesta(set folset){
-    //TODO REVISAR LLAVE QUE CIERRA
   test(firsts[PC], une(une(une(folset,firsts[LD]),firsts[LP]),cons(CLLA_CIE, NADA)) ,60);
 
   if (sbol->codigo == CLLA_ABR) scanner();
@@ -708,7 +706,6 @@ void termino(set folset) {
 	}else{
 	    scanner();
 	}
-    //TODO EN TERMINO, EXP SIMPLE.. revisar si va folset solo
     factor(folset);
   }
 
@@ -789,14 +786,15 @@ void variable(set folset){
      if(inf_id->ptr_tipo == en_tabla("TIPOERROR")){
         insertarTS();
     }
-
-     if(en_tabla(tipo_aux) == NIL){
-         error_handler(33);
-     }else if(strcmp(tipo_aux,"") != 0  && ts[en_tabla(tipo_aux)].ets->ptr_tipo == en_tabla("TIPOARREGLO")){
-         if(!function_call_flag){
-            error_handler(40);
-         }
-     }
+     
+        if(en_tabla(tipo_aux) == NIL &&(sbol->codigo!=CCONS_ENT)){
+            error_handler(33);
+        }else if(strcmp(tipo_aux,"") != 0  && ts[en_tabla(tipo_aux)].ets->ptr_tipo == en_tabla("TIPOARREGLO")){
+            if(!function_call_flag){
+                error_handler(40);
+            }
+        }
+      
  }
   test(folset,cons(NADA,NADA),71);
 }
