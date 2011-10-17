@@ -397,7 +397,7 @@ void declarador_init(set folset){
 	      if (sbol->codigo == CCONS_ENT)
               {
                   inf_id->desc.part_var.arr.cant_elem = atoi(sbol->lexema);
-                  constante(une(firsts[C],une(folset,cons(CCOR_CIE|CLLA_ABR|CLLA_CIE, CASIGNAC))));
+                  constante(une(firsts[LI],une(folset,cons(CCOR_CIE, CASIGNAC))));
               }
 	      if (sbol->codigo == CCOR_CIE) scanner();
 	      else error_handler(21);
@@ -589,10 +589,13 @@ void proposicion_e_s(set folset) {
             if (sbol->codigo == CSHR) scanner();
             else error_handler(28);
             variable(une(firsts[V], une(folset,cons(CPYCOMA|CSHR,NADA))));
-	    while (sbol->codigo == CSHR) {
-               scanner();
-               variable(une(firsts[V],une(folset,cons(CPYCOMA,NADA))));
+
+             while (sbol->codigo == CSHR ) {
+                scanner();
+                variable(une(une(folset,cons(CSHR|CPYCOMA,NADA)),firsts[V]));
+               
             }
+
 	    if (sbol->codigo == CPYCOMA) scanner();
 	    else error_handler(22);
 	    break;
@@ -601,9 +604,11 @@ void proposicion_e_s(set folset) {
              if (sbol->codigo == CSHL) scanner();
              else error_handler(29);
              expresion(une(firsts[E], une(folset,cons(CPYCOMA|CSHL,NADA))));
-	     while (sbol->codigo == CSHL) {
-               scanner();
-               expresion(une(firsts[E], une(folset,cons(CPYCOMA,NADA))));
+
+             while (sbol->codigo == CSHL){
+                        scanner();
+               
+             expresion(une(une(folset,cons(CSHL|CPYCOMA,NADA)),firsts[E]));
              }
 	     if (sbol->codigo == CPYCOMA) scanner();
 	     else error_handler(22);
@@ -647,7 +652,7 @@ void proposicion_expresion(set folset){
 
 void expresion(set folset) {
 
-  expresion_simple(une(une(une(folset,firsts[R]),firsts[E]),cons(CASIGNAC,NADA)));
+  expresion_simple(une(une(folset,firsts[E]),cons(CASIGNAC, CDISTINTO|CIGUAL|CMENOR|CMEIG|CMAYOR|CMAIG)));
 
   if(in(sbol->codigo,firsts[E])){
       error_handler(78);
@@ -687,11 +692,10 @@ void expresion_simple(set folset) {
   {
     if(in(sbol->codigo, firsts[T])){
         error_handler(78);
-        termino(folset);
     }else{
         scanner();
-        termino(folset);
     }
+    termino(une(une(folset,cons(NADA,CMAS|CMENOS|COR)),firsts[T]));
   }
 
 }
@@ -707,7 +711,7 @@ void termino(set folset) {
 	}else{
 	    scanner();
 	}
-    factor(folset);
+    factor(une(une(folset,cons(NADA,CMULT|CDIV|CAND)),firsts[F]));
   }
 
 }
@@ -826,14 +830,15 @@ void llamada_funcion(set folset) {
 
 void lista_expresiones(set folset) {
 
-  expresion(une(folset,cons(CCOMA,NADA)));
+  expresion(une(firsts[E],une(folset,cons(CCOMA,NADA))));
 
-  while (sbol->codigo == CCOMA) {
-    scanner();
+  while (sbol->codigo == CCOMA){
 
-    expresion(folset);
-  }
+                scanner();      
 
+  expresion(une(une(folset,cons(CCOMA,NADA)),firsts[E]));
+ }
+  
 }
 
 void constante(set folset){
@@ -845,7 +850,7 @@ void constante(set folset){
   case CCONS_CAR: scanner(); break;
   default: error_handler(38); //scanner(); /*f_error(); aca va f_error, faltan los algoritmos de conversion a las constantes numericas. */
   }
-  test(folset,cons(NADA,NADA),74);
+
 }
 
 void test(set cjto1, set cjto2, int n){
