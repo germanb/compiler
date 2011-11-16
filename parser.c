@@ -1472,15 +1472,27 @@ void variable(set folset){
  }
   test(folset,cons(NADA,NADA),71);
 }
-void llamada_funcion(set folset) {
 
-  if (sbol->codigo == CIDENT) scanner();
-  else error_handler(16);
+
+// LLegue hasta aca y no pude seguir.. esta noche le doy masa para arriba
+struct Tipo llamada_funcion(set folset) {
+
+	char lexema[TAM_LEXEMA];
+	struct Tipo returnType;
+	isLlamadafuncion = 1;
+	en_tabla_funcion_Llama = en_tabla(sbol->lexema);
+
+  if (sbol->codigo == CIDENT){
+	strcpy(lexema, sbol->lexema);
+	scanner();
+  }else error_handler(16);
 
   if (sbol->codigo == CPAR_ABR) scanner();
   else error_handler(19);
 
   function_call_flag = 1;
+
+	cantParametros= 0; 
 
   if (sbol->codigo == CMAS || sbol->codigo == CMENOS ||
       sbol->codigo == CIDENT ||
@@ -1494,32 +1506,84 @@ void llamada_funcion(set folset) {
   else error_handler(20);
   function_call_flag = 0;
 
-  test(folset, cons(NADA,NADA),72);
+   test(folset, cons(NADA,NADA),72);
+
+	isLlamadafuncion = 0;
+	returnType.tipo= Tipo_Ident(lexema);
+	returnType.typeExpresionresion= funcion;
+	return returnType;
+
+
+  
 }
 
 void lista_expresiones(set folset) {
 
-  expresion(une(firsts[E],une(folset,cons(CCOMA,NADA))));
+  struct Tipo TipoE;
+  cantParametros = 0;
 
-  while (sbol->codigo == CCOMA){
+  TipoE = expresion(une(une(folset,cons(CCOMA,NADA)),firsts[E]));
+  cantParametros++;
 
-                scanner();      
+  chequeoParam(TipoE, cantParametros);//chequea el tipo de expresion TipoE con el parametro cantParametros
 
-  expresion(une(une(folset,cons(CCOMA,NADA)),firsts[E]));
- }
+  while (sbol->codigo == CCOMA)
+  {
+
+/* PERA: Jere entra al while así: 
+    while (sbol->codigo == CCOMA || in(sbol->codigo, first(expresio))){
+        if (in(sbol->codigo, first(expresio))) error_handler(75);
+        else scanner();
+
+pero esto estaba así en la 2da entrega por lo que nosotros lo debemos hacer en otro lado
+*/
+	scanner();
+
+	TipoE = expresion(une(une(folset,cons(CCOMA,NADA)),firsts[E]));
+        cantParametros++;
+	chequeoParam(TipoE, cantParametros);
+
+  }
   
 }
 
-void constante(set folset){
+struct Tipo constante(set folset){
   test(firsts[CON],folset,73);
 
+  struct Tipo returnType;
+  returnType.typeExpresionresion = Constant;  
+
+
   switch (sbol->codigo) {
-  case CCONS_ENT: scanner(); break;
-  case CCONS_FLO: scanner(); break;
-  case CCONS_CAR: scanner(); break;
-  default: error_handler(38); //scanner(); /*f_error(); aca va f_error, faltan los algoritmos de conversion a las constantes numericas. */
+
+  case CCONS_ENT: 
+
+	returnType.valor = atoi(sbol->lexema);
+	strcpy(returnType.sValor, sbol->lexema);
+	returnType.tipo = en_tabla("int");
+	break;
+
+  case CCONS_FLO:
+
+	returnType.valor = charToFloat(sbol->lexema);
+	strcpy(returnType.sValor, sbol->lexema);
+	returnType.tipo = en_tabla("float");
+	break;
+
+  case CCONS_CAR:
+
+	returnType.valor = sbol->lexema[1];
+	strcpy(returnType.sValor, iToStr(returnType.valor));
+	returnType.tipo = en_tabla("char");
+	break;
+
+  default: error_handler(38);
   }
 
+  cantConstantess++;
+  scanner();
+
+  return returnType;
 }
 
 void test(set cjto1, set cjto2, int n){
