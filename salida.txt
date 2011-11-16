@@ -1,0 +1,92 @@
+########## Ejecucion del compilador ########
+
+############  ./lotes-primer-entrega/lote2/p1.c ##############
+Linea 1 - int chara( int i) {
+Linea 2 - cin >> else i;
+	 Error 70: Símbolo inesperado o falta símb. al comienzo de variable. 
+Linea 3 - }
+	 Error 37: Falta return
+Linea 4 - void main () {
+Linea 5 -  float c 2 int b;
+	 Error 79: Falta = 
+	 Error 22: Falta ;
+Linea 6 -  if (c > 2) {
+Linea 7 -  char a;
+Linea 8 -  cin >> 2 a;
+	 Error 70: Símbolo inesperado o falta símb. al comienzo de variable. 
+	 Error 16: Falta identificador
+	 Error 22: Falta ;
+	 Error 78: Falta *, /, &&, +, -, ||, = u operador de relación 
+Linea 9 -  }
+Linea 10 -  else >> a;
+	 Error 63: Símbolo inesperado o falta símb. al comienzo de proposición. 
+Linea 11 - }
+Linea 12 - 
+
+############  ./lotes-primer-entrega/lote2/p2.c ##############
+Linea 1 - int a[]= {1,2 3};
+	 Error 75: Falta , 
+Linea 2 - int bc( a int b){ 
+	 Error 51: Símbolo inesperado o falta especificador de tipo. 
+	 Error 17: Tipo no definido 
+	 Error 75: Falta , 
+Linea 3 -  return a || b;
+Linea 4 - }
+Linea 5 - void main () {
+Linea 6 -  char ass;
+Linea 7 -  cin >> ass;
+Linea 8 - }
+Linea 9 - 
+
+############  ./lotes-primer-entrega/lote2/p3.c ##############
+Linea 1 - void main () {
+Linea 2 -  float c 2 int b;
+	 Error 79: Falta = 
+	 Error 22: Falta ;
+Linea 3 -  if (c > 2) {
+Linea 4 -  char ass;
+Linea 5 -  cin >> * ass;
+	 Error 70: Símbolo inesperado o falta símb. al comienzo de variable. 
+Linea 6 -  }
+Linea 7 - }
+Linea 8 - 
+
+############  ./lotes-primer-entrega/lote2/p4.c ##############
+Linea 1 - void main () {
+Linea 2 -  char if;
+	 Error 57: Símbolo inesperado o falta símb. al comienzo de lista decl. init.
+	 Error 16: Falta identificador
+	 Error 22: Falta ;
+	 Error 19: Falta (
+	 Error 67: Símbolo inesperado o falta símb. al comienzo de expresión simple. 
+	 Error 68: Símbolo inesperado o falta símb. al comienzo de factor. 
+	 Error 31: En factor
+	 Error 20: Falta )
+Linea 3 -  cin >> ass;
+	 Error 33: Identificador no declarado
+Linea 4 -  }
+Linea 5 - }
+	 Error 61: Símbolo inesperado después de proposición compuesta. 
+Linea 6 - 
+
+############  ./lotes-primer-entrega/lote2/p5.c ##############
+Linea 1 - int bc (char uno, char dos){
+Linea 2 -  return uno * dos;
+Linea 3 - }
+Linea 4 - void main () {
+Linea 5 -  char ass;
+Linea 6 -  int result;
+Linea 7 -  cin >> ass;
+Linea 8 -  result = bc (ass ass);
+	 Error 78: Falta *, /, &&, +, -, ||, = u operador de relación 
+Linea 9 -  ass = 3;
+Linea 10 - }
+Linea 11 - 
+
+############  ./lotes-primer-entrega/lote2/p6.c ##############
+Linea 1 - void main () {
+Linea 2 -  float b;
+Linea 3 -  b = (3 > b) else ;
+	 Error 69: Símbolo inesperado después de factor. 
+Linea 4 - }
+Linea 5 - 
