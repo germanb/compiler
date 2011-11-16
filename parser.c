@@ -10,9 +10,9 @@
 #include "codigos.h"
 #include "var_globales.h"
 #include "ts.h"
-#include "set.c"
+#include "set.h"
 #include "error.h"
-
+#include "soporte_ejecucion.h"
 /*********** prototipos *************/
 
 void unidad_traduccion(set folset);
@@ -25,7 +25,7 @@ void lista_declaraciones_param(set folset);
 void declaracion_parametro(set folset);
 void declarador_init(set folset);
 void lista_declaraciones_init(set folset);
-void constante();
+struct Tipo constante();
 void lista_inicializadores();
 void lista_proposiciones();
 void lista_declaraciones();
@@ -37,28 +37,85 @@ void proposicion_seleccion();
 void proposicion_iteracion();
 void proposicion_e_s();
 void proposicion_retorno();
-void variable();
-void expresion();
+struct Tipo variable();
+struct Tipo expresion();
 void expresion_asignacion();
 void expresion_relacional();
-void expresion_simple();
+struct Tipo expresion_simple();
 void relacion();
-void termino();
-void factor();
-void llamada_funcion();
+struct Tipo termino();
+struct Tipo factor();
+struct Tipo llamada_funcion();
 void lista_expresiones();
 void test(set cjto1, set cjto2, int n);
+char *getStringINST(int INST);
 
 void scanner ();
 
 /********** variables globales ************/
 
+int isReturn= 0;
+int isLlamadafuncion= 0;
+int isINOUT= 0;
+int llamolista_ini= 0;
+int isConstante= 0;
+int isdeffuncion= 0;
+extern char error;
+int vengodeIF =0;
+int sentencia= 0;
+int control= 0;
+
+char *archivo;
+
+char *codigo[15000]; //Para mostrar
+char *codigoMostrar[15000]; //Para mostrar por pantalla
+char *newLine;
+int  newLineMAC= 0;
+
+char posID= 0;
+int constEntera= -1;
+int cantConstantess= 0;
+int cantParametros= 0;
+int en_tabla_funcion= NIL;
+int en_tabla_funcion_Llama= NIL;
+
+int segVar= 2;
 
 
 token *sbol;
 
-extern FILE *yyin;
 
+int posTabla;
+int cantPar;
+int tamARR=0;
+char lexema[17];
+int bandera;
+int posicionTS;
+int esParametro = 0;
+char *archivo;
+
+
+int esIndice = 0;
+
+enum noTerminales{
+lista_declaracion_de_parametro, definicion_de_funcio, lista_declaraciones_ini, lista_de_inicializadore, proposicion_compuest, lista_de_proposicione, proposicio,proposicion_de_iteracio, proposicion_de_seleccio, proposicion_e_, proposicion_de_retorn, proposicion_expresio, expresio,declaracione, especificador_de_tip, expresion_simpl, lista_de_expresione, termin, facto, variabl, llamada_a_funcio, declaracion_de_parametr, lista_de_declaracione, declaracio, especificador_de_declaracione,relacio, declaracion_de_variabl, constant, declarador_ini, unidad_traduccio
+};
+
+enum typeExpresion {variables,
+unaVariable,
+Constant,
+vars_consts,
+funcion,
+Const_iToStr};
+
+
+extern FILE *yyin;
+extern int despl;
+
+extern float P[];
+extern int lp;
+extern int lc;
+extern char C[];
 //flag para ver si tiene return una funcion
 int return_flag;
 int function_call_flag = 0;
@@ -86,52 +143,641 @@ void scanner() {
   /* El alumno debera dar una solucion al problema que las constantes
     enteras y flotantes son entregadas como strings al parser */
 }
+struct Tipo{
+    enum    typeExpresion typeExpresionresion;
+    int    tipo;
+    int    tipo_base;
+    float   valor;
+    char    sValor[150];
+    int     nivel;
+    int     despl;
+};
+int toInt(char t[]){
+int res= 0, Ti= strlen(t)-1, piso= 0;
+
+    if (t[0]== '-') piso= 1;
+
+    for (; Ti>=piso; Ti--) res+= (t[Ti]-48)*elev(10,strlen(t)-(Ti+1));
+
+    return (t[0]== '-')? -res : res;
+}
+
+int elev(int x, int y){
+int Rstado=1;
+	for (;y>0;y--) Rstado *= x;
+return Rstado;
+}
+
+char *deReversa(char cadena[]){
+    int i;
+    char temp;
+
+    for (i= 0; i < strlen(cadena)/2; i++){
+        temp= cadena[i];
+        cadena[i]= cadena[strlen(cadena) -1 - i];
+        cadena[strlen(cadena) -1 - i]= temp;
+    }
+    return cadena;
+}
+
+char *concatString(char s1[], char s2[]){
+    newLine= (char *) calloc(1, 50);
+    strcat(newLine, s1);
+    strcat(newLine, " ");
+
+    return strcat(newLine, s2);;
+}
+
+char *unionST(char s1[], char s2[]){
+    newLine= (char *) calloc(1, 50);
+    strcat(newLine, s1);
+    return strcat(newLine, s2);
+}
+
+//**********************************************************
+char *strmplN(char *s1){
+    int i,j;
+
+    for (i= 0; s1[i]!= 0; i++)
+        if (s1[i] == 92 && s1[i+1] == 'n'){
+            s1[i++]= '\n';
+            for (j= i; s1[j] && s1[j+1]; j++)
+                s1[j]=s1[j+1];
+            s1[j]= 0;
+        }
+
+    return s1;
+}
+
+char *strmplT(char *s1){
+    int i,j;
+
+    for (i= 0; s1[i]!= 0; i++)
+        if (s1[i] == 92 && s1[i+1] == 't'){
+            s1[i++]= '\t';
+            for (j= i; s1[j] && s1[j+1]; j++)
+                s1[j]=s1[j+1];
+            s1[j]= 0;
+        }
+
+    return s1;
+}
+//**********************************************************
+
+
+char *iToStr(int num){
+char *salida= (char *)calloc (1, TAM_LEXEMA);
+int i=0;
+if (num >= 0){
+	if (num == 0){
+            salida[0]= '0';
+            i= 1;
+        }
+        for (;num>0;i++){
+            salida[i]=num%10+48;
+            num/=10;
+        }
+        salida[i]= 0;
+        return deReversa(salida);
+    }else
+return unionST("-",iToStr(-num));
+}
+
+void appendMAC(int INST, char linea[]){
+    //printf("INSTI string:  %s\n", iToStr(INST));
+    //printf("INSTI:  %d\n", INST);
+    codigo[newLineMAC]= concatString(iToStr(INST),linea);
+    //codigo[newLineMAC]= concatString(linea,iToStr(INST));
+    codigoMostrar[newLineMAC++]= concatString(getStringINST(INST),linea);
+}
+
+void appendKMAC(int INST, char linea[], int kLinea){
+    int i;
+
+    for (i= newLineMAC-1; i >= kLinea; i--){
+        codigo[i+1]= codigo[i];
+        codigoMostrar[i+1]= codigoMostrar[i];
+    }
+    codigo[kLinea]= concatString(iToStr(INST),linea);
+    codigoMostrar[kLinea]= concatString(getStringINST(INST),linea);
+
+    newLineMAC++;
+}
+
+void appendParam(tipo_inf_res *info_param){
+    tipo_inf_res *cur;
+
+    cur= ts[en_tabla_funcion].ets->desc.part_var.sub.ptr_inf_res;
+
+    if (cur == NULL)
+       ts[en_tabla_funcion].ets->desc.part_var.sub.ptr_inf_res= info_param;
+    else{
+        while (cur->ptr_sig != NULL)
+            cur= cur->ptr_sig;
+
+        cur->ptr_sig= info_param;
+    }
+
+}
+tipo_inf_res getParam(int k){
+    int i;
+    tipo_inf_res *cur, salida;
+
+    cur= ts[en_tabla_funcion_Llama].ets->desc.part_var.sub.ptr_inf_res;
+
+    for (i= 1; i <= k && cur != NULL; i++){
+        salida= *cur;
+        cur= cur->ptr_sig;
+    }
+    return salida;
+}
+
+void chequeoParam(struct Tipo parametroReal, int numParametro){
+    tipo_inf_res parametroFormal;
+
+  //  printf("numero de parametro..........       %d\n",numParametro);
+
+    if (numParametro <= ts[en_tabla_funcion_Llama].ets->desc.part_var.sub.cant_par){
+
+        parametroFormal = getParam(numParametro);
+
+        // printf("NUMERO PARAMETRO(%d)\n",numParametro);
+	/*
+	printf("%d\n",parametroFormal.ptero_tipo_base);
+	printf("%d\n",parametroFormal.ptero_tipo);
+	printf("%c\n",parametroFormal.tipo_pje);
+	*/
+
+        if (parametroFormal.ptero_tipo == en_tabla("TIPOARREGLO")){
+
+            if (parametroReal.typeExpresionresion != unaVariable)
+                error_handler(91);
+            else
+            if (parametroReal.tipo != en_tabla("TIPOARREGLO") || (parametroReal.tipo_base != parametroFormal.ptero_tipo_base)){
+
+                //printf("\n\n\nparametro real tipo... %d\n",parametroReal.tipo);
+		//printf("posicion del tipo arreglo... %d\n",		en_tabla("TIPOARREGLO"));
+
+                 //printf("numero de parametro... %d\n\n\n\n\n",numParametro);
+		//printf("parametro real tipo base... %d\n",parametroReal.tipo_base);
+                //printf("parametro formal tipo base... %d\n",parametroFormal.ptero_tipo_base);
+
+                 //printf("arribaaaaaaaaaaaaa %d\n\n\n\n\n",numParametro);
+                error_handler(90);
+		}
+        }else{
+
+            if (parametroReal.tipo == en_tabla("TIPOARREGLO"))
+                error_handler(90);
+            else
+            if (parametroFormal.tipo_pje == 'r' && parametroReal.typeExpresionresion != unaVariable)
+                error_handler(92);
+
+	if (parametroFormal.ptero_tipo == en_tabla("float") && (parametroReal.tipo == en_tabla("float") || parametroReal.tipo == en_tabla("char") || 				parametroReal.tipo == en_tabla("int"))){return;}
+		else //error_handler(90);
+
+	if (parametroFormal.ptero_tipo == en_tabla("int") && (parametroReal.tipo == en_tabla("char") || parametroReal.tipo == en_tabla("int"))){return;}
+		else //error_handler(90);
+		if (parametroFormal.ptero_tipo == en_tabla("char") && parametroReal.tipo == en_tabla("char") ){return;}
+		else error_handler(90);
+		}
+
+
+    }
+}
+
+float charToFloat(char num[]){
+
+    char part_ent[strlen(num)+1], part_dec[strlen(num)+1];
+    int punto= 0;
+    float res= 0;
+    int i, decimales, piso= 0;
+
+
+    if (num[0]== '-') piso= 1;//Si es negativo
+
+    part_ent[0]= part_dec[0]= '0';
+    part_ent[1]= part_dec[1]= 0;
+
+    for (i= piso; i <= strlen(num); i++){
+        if (num[i] == '.'){
+            punto= 1;
+            part_ent[i-piso]= 0;
+        }else
+            if (!punto)
+                part_ent[i-piso]= num[i];
+            else
+                part_dec[i-piso - (strlen(part_ent)+1)]= num[i];
+    }
+    decimales= strlen(part_dec);
+    res= (toInt(strcat(part_ent, part_dec))+.0)/elev(10, decimales);
+
+    return (num[0]== '-')? -res : res;
+}
+void clearLMAC(){
+    codigo[newLineMAC-1]= NULL;
+    codigoMostrar[--newLineMAC]= NULL;
+}
+
+void clearKLMAC(int kLinea){
+    int i;
+
+    codigo[kLinea]= NULL;
+    codigoMostrar[kLinea]= NULL;
+
+    for (i= kLinea; i < newLineMAC-1; i++){
+        codigo[i]= codigo[i+1];
+        codigoMostrar[i]= codigoMostrar[i+1];
+    }
+    newLineMAC--;
+}
+
+void verInstrucciones(){
+    int i;
+
+    printf("\n\n MAC:\n\n\n");
+
+    for (i= 0; i < newLineMAC; i++){
+        //printf("CODIGO %d: %s\n", i, codigo[i]);
+        printf("Linea %d: %s\n", i+1, codigoMostrar[i]);
+    }
+
+
+    printf("\n******************\n");
+}
+
+/*
+void generarSalida(){
+
+printf("ffffffffffffffffff");
+FILE *PObj;
+
+
+if ((PObj= fopen(strcat(archivo, ".o"), "w")) != NULL){
+int i;
+
+for (i= 0; i < dameCS(); i++)
+	fprintf(PObj, "%c\n", dameC(i));
+
+//fprintf(PObj, "$ ");
+
+for (i= 0; i < newLineMAC; i++)
+	fprintf(PObj, "%s\n", codigoMostrar[i]);
+
+for (i= 0; i < newLineMAC; i++)
+	printf(dameC(i));
+
+	}
+fclose(PObj);
+}
+*/
+
+
+
+
+void generarSalida(){
+FILE *PObj;
+char arreglo[500];
+int j;
+int t;
+int index,index2;
+char aux;
+char arreglo1[30];
+char arreglo2[30];
+int banderasa = 0;
+if ((PObj= fopen(strcat(archivo, ".o"), "w")) != NULL){
+	int i;
+        //printf("dameCS:_________________ %c\n", dameCS());
+	fprintf(PObj, "$ ");
+        for (i= 0; i < newLineMAC; i++){
+                //index2=0;
+                //strcpy(arreglo1,codigo[i]);
+                //printf("arreglo: %s\n", arreglo1);
+		/*for(index = 0; arreglo1[index]!='\0'; index++){
+			if(arreglo1[index]!= '_'){
+				arreglo2[index2++] = arreglo1[index];
+				banderasa=1;
+
+			}else{
+				banderasa=0;
+                                printf("arreglo2: %s\n", arreglo2);
+                                arreglo2[index2]='\0';
+				fprintf(PObj, "%f\n", charToFloat(arreglo2));
+                                index2=0; arreglo2[0]='\0';
+
+			}
+
+		}*/
+	         //printf("arreglo2: %s\n", codigo[i]);
+        	fprintf(PObj, "%s\n", codigo[i]);
+        }
+
+	fprintf(PObj, "$ ");
+
+
+	//for(t=0;t<150;t++) printf("arreglo");
+
+        for (i= 0,j=0; i < dameCS(); i++){
+        //for (i= 0,j=0; i < dameCS()-1; i++){
+        	//aux = dameC(i);
+        	//printf("dameC metodo:               %c\n", dameC(i));
+        	//printf("aux:               %c\n", aux);
+        	//arreglo[j] = aux;
+		 fprintf(PObj, "%d\n", dameC(i));
+                //fwrite(&aux, sizeof(char), 1,PObj);
+	}
+       	fprintf(PObj, "$ ");
+	//for(t=0;t<150;t++) printf("arreglo %c\n", arreglo[t]);
+        //printf("arreglo %s\n", *arreglo);
+
+        //aux =   "$";
+        //fwrite(&aux, sizeof(char), 1,PObj);
+	}
+fclose(PObj);
+}
+
+int tam_Instr(char *Inst){
+    int i, tam= 0;
+    for (i= 0; i < strlen(Inst); i++)
+        if (Inst[i] == ' ' && Inst[i+1] != 0) tam++;
+    return tam + 1;
+}
+
+int calcularDespl(int LineaO, int LineaSalto){
+    int i, despl= 0;
+    if (LineaO <= LineaSalto){
+        for (i= LineaO ; i < LineaSalto; i++)
+            despl+= tam_Instr(codigo[i]);
+        return despl;
+    }else
+        return -(calcularDespl(LineaSalto, LineaO)+ 2 + 3);
+}
+
+char Cohersion(char tipo, char Tipo_Operado){
+    char Tipo_Retorno= en_tabla("float");
+
+    if (tipo == en_tabla("TIPOARREGLO") || Tipo_Operado == en_tabla("TIPOARREGLO"))
+        return en_tabla("TIPOARREGLO");
+
+    if (tipo == en_tabla("TIPOERROR") || Tipo_Operado == en_tabla("TIPOERROR"))
+        return en_tabla("TIPOERROR");
+
+    if (tipo == en_tabla("char"))
+        Tipo_Retorno= Tipo_Operado;
+    else
+    if (tipo == en_tabla("int")){
+        if (Tipo_Operado == en_tabla("float"))
+            Tipo_Retorno= Tipo_Operado;
+        else
+            Tipo_Retorno= en_tabla("int");
+    }
+
+    return Tipo_Retorno;
+}
+
+char getTipo(char tipo){
+    if (tipo == en_tabla("char"))
+        return 0;
+    else
+    if (tipo == en_tabla("int")){
+
+        return 1;
+    }else{
+
+        return 2;
+    }
+}
+
+char *getStringINST(int INST){
+    char *sINST= (char *)calloc (1, 13);
+    strcpy(sINST, ">>ERROR<<");
+    switch(INST){
+        case CRCT   : strcpy(sINST, sCRCT); break;
+        case CRVL   : strcpy(sINST, sCRVL); break;
+        case SUM    : strcpy(sINST, sSUM); break;
+        case SUB    : strcpy(sINST, sSUB); break;
+        case MUL    : strcpy(sINST, sMUL); break;
+        case DIV    : strcpy(sINST, sDIV); break;
+        case INV    : strcpy(sINST, sINV); break;
+        case AND    : strcpy(sINST, sAND); break;
+        case OR     : strcpy(sINST, sOR); break;
+        case NEG    : strcpy(sINST, sNEG); break;
+        case POP    : strcpy(sINST, sPOP); break;
+        case CAST   : strcpy(sINST, sCAST); break;
+        case CMMA   : strcpy(sINST, sCMMA); break;
+        case CMME   : strcpy(sINST, sCMME); break;
+        case CMIG   : strcpy(sINST, sCMIG); break;
+        case CMAI   : strcpy(sINST, sCMAI); break;
+        case CMEI   : strcpy(sINST, sCMEI); break;
+        case CMNI   : strcpy(sINST, sCMNI); break;
+        case ALM    : strcpy(sINST, sALM); break;
+        case LEER   : strcpy(sINST, sLEER); break;
+        case IMPR   : strcpy(sINST, sIMPR); break;
+        case BIFF   : strcpy(sINST, sBIFF); break;
+        case BIFS   : strcpy(sINST, sBIFS); break;
+        case INPP   : strcpy(sINST, sINPP); break;
+        case PARAR  : strcpy(sINST, sPARAR); break;
+        case ALOC   : strcpy(sINST, sALOC); break;
+        case DMEM   : strcpy(sINST, sDMEM); break;
+        case CRDI   : strcpy(sINST, sCRDI); break;
+        case CRVLI  : strcpy(sINST, sCRVLI); break;
+        case ALMI   : strcpy(sINST, sALMI); break;
+        case ENPR   : strcpy(sINST, sENPR); break;
+        case CHPR   : strcpy(sINST, sCHPR); break;
+        case RTPR   : strcpy(sINST, sRTPR); break;
+        case ENBL   : strcpy(sINST, sENBL); break;
+        case FINB   : strcpy(sINST, sFINB); break;
+        case IMPCS  : strcpy(sINST, sIMPCS); break;
+        case CRCTS  : strcpy(sINST, sCRCTS);
+    }
+    return sINST;
+}
+
+void compilacion(){
+
+    sbol=&token1 ;
+
+    appendMAC(INPP,"");
+    //appendMAC(ENBL, iToStr(get_nivel()));
+
+    printf("\nCOMPILACION\n");
+
+    inic_tablas();
+
+    scanner();
+
+    unidad_traduccion(cons(NADA, CEOF));
+
+    if (Clase_Ident("main") != CLASFUNC){
+            error_handler(15);
+            error_handler(COD_IMP_ERRORES);
+    }else
+            if (ts[en_tabla("main")].ets->desc.part_var.sub.cant_par != 0){
+                    error_handler(36);
+                    error_handler(COD_IMP_ERRORES);
+            }else
+                    if (Tipo_Ident("main") != en_tabla("void")){
+                            error_handler(35);
+                            error_handler(COD_IMP_ERRORES);
+                    }
+
+
+    if (sbol->codigo != CEOF) error_handler(8);
+    printf("\n\n\nCOMPILACION CORRECTA\n\n\n\n");
+    //appendMAC(FINB, iToStr(get_nivel()));
+    appendMAC(PARAR,"");
+    if (error == 0){
+        verInstrucciones();
+        generarSalida();
+    }
+}
+
+/*
+void ejecucion(){
+    //int j =0;
+    FILE *PObj;
+    char cur[25];
+    printf("archivo:   %s\n",strcat(archivo, ".o"));
+    PObj= fopen(strcat(archivo, ".o"), "r");
+    if (PObj!= NULL){
+      //  printf("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+       // while(j<=1000000){
+        // printf("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+        //  j++;
+     //	}
+        int i;
+        fscanf(PObj, "%s", cur);
+        //fgets (cur , 20,PObj);
+        //printf("cur: %s",&cur);
+       // for (i= 0; cur!=NULL ; i++){
+        //for (i= 0; strcmp(cur, "$"); i++){
+            addC(toInt(cur));
+            fscanf(PObj, "%s", cur);
+        }
+
+       //for (i= 0; strcmp(cur, "$"); i++){
+     //   addC(toInt(cur));
+           // fscanf(PObj, "%s", cur);
+     // }
+
+     //    fscanf(PObj, "%s", cur);
+
+     //        float val = -1;
+     //        for (i = 0; !feof(PObj); i++) {
+     //	       printf("cur: %s",cur);
+     //            //val = P[i];
+     //
+     //              }
+
+        // while(!feof(PObj)){
+         for (i= 0;!feof(PObj); i++){
+            float cod;
+
+             cod= charToFloat(cur);
+            //printf("floAT: %f",&cod);
+	    //fgets (cur ,100,PObj);
+            printf("cur: %s",cur);
+            pushP(&cod);
+
+            fscanf(PObj, "%s", cur);
+        }
+    }else{
+          //printf("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
+    }
+
+    fclose(PObj);
+
+    interprete();
+
+}
+
+*/
+
+
+void ejecucion(){
+    float cod;
+    FILE *PObj;
+    char cur[500];
+    int kk;
+
+    if ((PObj= fopen(strcat(archivo, ".o"), "r")) != NULL){
+        int i;
+//      for(kk=0;kk<10000;kk++)printf("aaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
+
+        fscanf(PObj, "%s", &cur);
+        fscanf(PObj, "%s", &cur);
+	//for(kk=0;kk<10000;kk++) printf("PASOOOOOOOOOOOOO\n");
+        for (i= 0; strcmp(cur, "$"); i++){
+            cod= charToFloat(cur);
+           //  printf("COD: %f\n",cod);
+           // printf("CUR: %s\n",cur);
+            //pushP(&cod);                 // 1) Cargar Instruccion
+
+            P[i] = cod;
+            lp++;
+            fscanf(PObj, "%s", &cur);    // 2) Leer otra Instruccion
+        }
+
+       // for(kk=0;kk<10000;kk++) printf("PASOOOOOOOOOOOOOFUERAAAAAAAAAA\n");
+
+        fscanf(PObj, "%s", &cur);
+
+       for (i= 0; strcmp(cur, "$"); i++){   // 1) Leer y Cargar las Constanes de Strings
+            addC(toInt(cur));
+            fscanf(PObj, "%s", &cur);
+        }
+
+     /*
+     float val = -1;
+                for (i = 0; val != PARAR; i++) {
+                    fscanf(obj, "%f\n", &P[i]);
+                    val = P[i];
+     }
+    */
+    //for(kk=0;kk<200;kk++) printf("P: %f\n",P[kk]);
+    //for(kk=0;kk<200;kk++) printf("C: %c\n",C[kk]);
+    }
+    fclose(PObj);
+    //28352
+    interprete2();
+}
+
+
+
+
 
 
 int main( int argc,char *argv[]) {
 
-    //AGREGAR -C Y -E
+linea = (char *) malloc (2);
+    strcat(linea, "");
 
-  /* el alumno debera inicializar la variable yyin segun corresponda */
-  linea = (char *) malloc (2);
-  strcat(linea, "");
+    nro_linea=0;
 
-  nro_linea=0;
- //  if (argc == 30) {
-  if (argc != 3) {
-    error_handler(6);
-    error_handler(COD_IMP_ERRORES);
-    exit(1);
-  }
-  else {
-    if ((yyin = fopen(argv[2], "r" )) == NULL) {
- //     if ((yyin = fopen("prueba.c", "r" )) == NULL) {
-      error_handler(7);
-      error_handler(COD_IMP_ERRORES);
-      exit(1);
+    if (argc != 3) {
+        error_handler(6);
+        error_handler(COD_IMP_ERRORES);
+        exit(1);
     }
-  }
+    else {
+        if ((yyin = fopen(argv[2], "r" )) == NULL) {
+            error_handler(7);
+            error_handler(COD_IMP_ERRORES);
+            exit(1);
+        }
+        archivo= argv[2];
+        *(archivo + strlen(archivo)-2)= 0;
+    }
 
-  sbol=&token1 ;/* la variable token */
+    if (argv[1][1] == 'c'){
+                compilacion();
 
-  //inicializa las tablas
-  inic_tablas();
-  initFirsts();
-  
-  scanner();
-  
-  set folset = cons(NADA,CEOF);
+	}
+    else if (argv[1][1] == 'e'){
 
-  unidad_traduccion(folset);
+        ejecucion();
 
-  if(en_tabla("main") == NIL){
-      error_handler(15);
-  }
-
- // show_ts();
-
- // if (sbol->codigo != CEOF) error_handler(8);
-  error_handler(COD_IMP_ERRORES);
+	}
 }
 
 
@@ -165,11 +811,23 @@ void especificador_tipo(set folset){
 
     inf_id->ptr_tipo = en_tabla(sbol->lexema);
     switch (sbol->codigo) {
-        case CVOID: scanner(); break;
-        case CCHAR: scanner(); break;
-        case CINT: scanner(); break;
-        case CFLOAT: scanner(); break;
-        default: error_handler(17);
+    case CVOID:{
+	scanner();
+	posID=en_tabla("void");
+	break;}
+    case CCHAR:{
+	scanner();
+	posID=en_tabla("char");
+	break;}
+    case CINT:{
+	scanner();
+	posID=en_tabla("int");
+	break;}
+    case CFLOAT:{
+	scanner();
+	posID=en_tabla("float");
+	break;}
+     default: error_handler(17);
     }
 
     test(folset, cons(NADA,NADA), 52);
@@ -180,11 +838,13 @@ void especificador_declaracion(set folset){
   test(firsts[ED],folset, 53);
 
   switch (sbol->codigo) {
-    case CPAR_ABR: definicion_funcion(folset); break;
+    case CPAR_ABR: {
+        definicion_funcion(folset);
+        break;}
     case CASIGNAC:
     case CCOR_ABR:
     case CCOMA:
-    case CPYCOMA:  declaracion_variable(folset); break;
+    case CPYCOMA: { declaracion_variable(folset); break;}
     default: error_handler(18);
   }
 
@@ -279,17 +939,24 @@ void lista_declaraciones_param(set folset){
       insertarTS();
 
     }
+
 }
 
 void declaracion_parametro(set folset) {
+
+    tipo_inf_res *info_res_param= NULL;
+    info_res_param= (tipo_inf_res *) calloc(1, sizeof(tipo_inf_res));
 
   especificador_tipo(une(folset,cons(CAMPER|CCOR_ABR|CCOR_CIE,CIDENT)));
 
   if (sbol->codigo == CAMPER){
       inf_id->desc.part_var.tipo_pje = PAR_REFERENCIA;
+       inf_id->cant_byte = ts[en_tabla("int")].ets->cant_byte;
       scanner();
   }else{
       inf_id->desc.part_var.tipo_pje = PAR_VALOR;
+       inf_id->cant_byte = ts[posID].ets->cant_byte;
+
   }
   if (sbol->codigo == CIDENT){
       strcpy(inf_id->nbre,sbol->lexema);
@@ -298,6 +965,7 @@ void declaracion_parametro(set folset) {
   else error_handler(16);
 
   if (sbol->codigo == CCOR_ABR){
+
       inf_id->desc.part_var.tipo_pje = PAR_REFERENCIA;
 
       scanner();
@@ -359,7 +1027,8 @@ void declaracion_variable(set folset){
       inf_id->ptr_tipo = aux;
       scanner();
     lista_declaraciones_init(une(folset,cons(CPYCOMA,NADA)));
-  }
+  }segVar= newLineMAC;
+
 
   if(ident_not_exists_flag == 0){
     inf_id->clase = CLASVAR;
@@ -378,9 +1047,9 @@ void declaracion_variable(set folset){
 
 
 void declarador_init(set folset){
-  test(une(folset,firsts[DI]), une(firsts[C],une(firsts[LI],une(folset,cons(CCOR_CIE|CLLA_ABR|CLLA_CIE, CASIGNAC)))),58);
+  test(une(folset,firsts[DI]), une(firsts[CON],une(firsts[LI],une(folset,cons(CCOR_CIE|CLLA_ABR|CLLA_CIE, CASIGNAC)))),58);
 
-  if(in(sbol->codigo,firsts[C])){
+  if(in(sbol->codigo,firsts[CON])){
 	error_handler(79);
 	constante(folset);
   }else{
@@ -423,15 +1092,15 @@ void declarador_init(set folset){
 }
 void lista_inicializadores(set folset) {
 
-  constante(une(folset, une(cons(CCOMA,NADA),firsts[C])));
+  constante(une(folset, une(cons(CCOMA,NADA),firsts[CON])));
 
-  while (sbol->codigo == CCOMA || in(sbol->codigo,firsts[C])) {
-      if(in(sbol->codigo,firsts[C])){
+  while (sbol->codigo == CCOMA || in(sbol->codigo,firsts[CON])) {
+      if(in(sbol->codigo,firsts[CON])){
           error_handler(75);
       }else{
           scanner();
       }
-    constante(une(folset, une(cons(CCOMA,NADA),firsts[C])));
+    constante(une(folset, une(cons(CCOMA,NADA),firsts[CON])));
   }
 
 }
@@ -494,7 +1163,7 @@ void declaracion(set folset){
 
 void lista_proposiciones(set folset) {
 
-  proposicion(une(folset,firsts[P]));
+  proposicion(une(folset,firsts[PRO]));
 
   while (sbol->codigo == CLLA_ABR || sbol->codigo == CMAS ||
 	 sbol->codigo == CMENOS || sbol->codigo == CIDENT ||
@@ -505,12 +1174,12 @@ void lista_proposiciones(set folset) {
 	 sbol->codigo == CIN || sbol->codigo == COUT ||
 	 sbol->codigo == CPYCOMA || sbol->codigo == CRETURN)
 
-    proposicion(une(folset,firsts[P]));
+    proposicion(une(folset,firsts[PRO]));
 
 }
 
 void proposicion(set folset){
-  test(firsts[P],folset,63);
+  test(firsts[PRO],folset,63);
   switch (sbol->codigo) {
   case CLLA_ABR:
       pushTB();
@@ -549,7 +1218,7 @@ void proposicion_iteracion(set folset) {
   if (sbol->codigo == CPAR_ABR) scanner();
   else error_handler(19);
 
-  expresion(une(une(folset,cons(CPAR_CIE,NADA)),firsts[P]));
+  expresion(une(une(folset,cons(CPAR_CIE,NADA)),firsts[PRO]));
 
   if (sbol->codigo == CPAR_CIE) scanner();
   else error_handler(20);
@@ -567,12 +1236,12 @@ void proposicion_seleccion(set folset) {
   if (sbol->codigo == CPAR_ABR) scanner();
   else error_handler(19);
 
-  expresion(une(une(folset,cons(CPAR_CIE|CELSE,NADA)),firsts[P]));
+  expresion(une(une(folset,cons(CPAR_CIE|CELSE,NADA)),firsts[PRO]));
 
   if (sbol->codigo == CPAR_CIE) scanner();
   else error_handler(20);
 
-  proposicion(une(une(folset,cons(CELSE,NADA)),firsts[P]));
+  proposicion(une(une(folset,cons(CELSE,NADA)),firsts[PRO]));
 
   if (sbol->codigo == CELSE){
     scanner();
@@ -588,11 +1257,11 @@ void proposicion_e_s(set folset) {
   case CIN: { scanner();
             if (sbol->codigo == CSHR) scanner();
             else error_handler(28);
-            variable(une(firsts[V], une(folset,cons(CPYCOMA|CSHR,NADA))));
+            variable(une(firsts[VAR], une(folset,cons(CPYCOMA|CSHR,NADA))));
 
              while (sbol->codigo == CSHR ) {
                 scanner();
-                variable(une(une(folset,cons(CSHR|CPYCOMA,NADA)),firsts[V]));
+                variable(une(une(folset,cons(CSHR|CPYCOMA,NADA)),firsts[VAR]));
                
             }
 
@@ -763,7 +1432,7 @@ void factor(set folset) {
 }
 
 void variable(set folset){
-  test(firsts[V],folset,70);
+  test(firsts[VAR],folset,70);
 
   char tipo_aux [TAM_ID] = "";
   if (sbol->codigo == CIDENT){
@@ -842,7 +1511,7 @@ void lista_expresiones(set folset) {
 }
 
 void constante(set folset){
-  test(firsts[C],folset,73);
+  test(firsts[CON],folset,73);
 
   switch (sbol->codigo) {
   case CCONS_ENT: scanner(); break;

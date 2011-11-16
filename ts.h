@@ -51,7 +51,8 @@
 //   Estructura que forma la lista con informacion resumida de parametros
 
  typedef struct inf_res{
-   int ptero_tipo;              // tipo del parametro
+   int ptero_tipo;
+   int ptero_tipo_base;
    char tipo_pje;               // tipo de pasaje: valor o referncia
    struct inf_res  *ptr_sig;    // siguiente parametro
  }tipo_inf_res;

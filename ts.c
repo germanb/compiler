@@ -57,6 +57,7 @@ tipo_TS   ts[TAM_TS];     // tabla de simbolos
 int       tb[TAM_BLOQ];   // tabla de bloques
 int  topeTS = BASE_TS;
 int  topeTB = BASE_TB;
+int     despl = 0;
 
 
 
@@ -146,6 +147,8 @@ void popTB()
 
 void pushTB()
 {                      // asumo que apunto al 1er ident del nuevo bloque
+     despl = 0;
+
    topeTB ++;
    if (topeTB == TAM_BLOQ) {
        error_handler(13);
@@ -158,6 +161,10 @@ void pushTB()
 void pop_nivel ()      // El bloque a eliminar esta al tope de TS y TB
 {
     int h;
+
+    despl = 0;
+
+
     while (topeTS >= tb[topeTB])
     {
       h = hash(ts[topeTS].ets->nbre);
@@ -166,6 +173,12 @@ void pop_nivel ()      // El bloque a eliminar esta al tope de TS y TB
     };
     popTB();      // elimino el bloque que abandono
 };
+
+int get_nivel(){
+    //return topeTB + 2;
+    return topeTB + 1;
+}
+
 
 
 /* ============ FUNCIONES DE LA TABLA DE HASH ================ */

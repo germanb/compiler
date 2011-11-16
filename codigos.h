@@ -74,7 +74,7 @@
 //LISTA DE DECLARADORES INIT
 #define LDI                     9
 //CONSTANTE
-#define C            10
+#define CON            10
 //LISTA DE INICIALIZADORES
 #define LI                              11
 //LISTA DE PROPOSICIONES
@@ -84,7 +84,7 @@
 //DECLARACION
 #define D               14
 //PROPOSICION
-#define P               15
+#define PRO               15
 //PROPOSICION EXPRESION
 #define PE                      16
 //PROPOSICION COMPUESTA
@@ -98,7 +98,7 @@
 //PROPOSICION RETORNO
 #define PR                      21
 //VARIABLE
-#define V               22
+#define VAR               22
 //EXPRESION
 #define E               23
 //EXPRESION SIMPLE
