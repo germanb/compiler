@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="69">
-  <projectmakefile>Makefile-compiler.mk</projectmakefile>
+  <projectmakefile>Makefile-tercer entrega.mk</projectmakefile>
   <defaultConf>0</defaultConf>
   <confs>
     <conf name="Default" type="0">
       <gizmo_options version="3">
-        <configurationname>GizmoSimple</configurationname>
       </gizmo_options>
       <runprofile version="6">
-        <args>-c prueba.c</args>
+        <args></args>
         <rundir></rundir>
         <buildfirst>true</buildfirst>
         <console-type>0</console-type>

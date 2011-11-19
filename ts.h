@@ -31,8 +31,8 @@
 #define CLASFUNC   3    // identificador de funcion
 #define CLASPAR    4    // identificador de parametro formal
 
-#define PAR_VALOR 'V'
-#define PAR_REFERENCIA 'R'
+
+
 
 /*
 
@@ -51,7 +51,7 @@
 //   Estructura que forma la lista con informacion resumida de parametros
 
  typedef struct inf_res{
-   int ptero_tipo;
+   int ptero_tipo;              // tipo del parametro
    int ptero_tipo_base;
    char tipo_pje;               // tipo de pasaje: valor o referncia
    struct inf_res  *ptr_sig;    // siguiente parametro
@@ -61,7 +61,7 @@
 
 
 // ------------------------- STC_TS ---------------------------
-//   Estructura propia de: variables (anonimas), subrutinas y parï¿½metros
+//   Estructura propia de: variables (anonimas), subrutinas y par metros
 
 
 typedef struct {
@@ -99,11 +99,11 @@ typedef struct {
 
 
 // ------------------------ ENTRADA_TS ---------------------------
-//          Estructura de una entrada en la tabla de sï¿½mbolos
+//          Estructura de una entrada en la tabla de s¡mbolos
 
 typedef struct{
 
-  char nbre[TAM_ID];  // nombre del identificador
+  char nbre[TAM_ID]; // nombre del identificador
 
   int clase;         // clase de objeto computacional:
 		     // vble., funcion, param., tipo.
@@ -121,7 +121,7 @@ typedef struct{
 
 
 // ---------------------------- TIPO_TS -----------------------------
-//          Estructura que define el tipo de la tabla de sï¿½mbolos
+//          Estructura que define el tipo de la tabla de s¡mbolos
 
 typedef struct {
 

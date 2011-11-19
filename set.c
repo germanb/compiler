@@ -56,13 +56,6 @@ set cons(long x,long y)
 	nuevo_set.p2 = y;
 	return nuevo_set;
 }
-/***********************************************************************
-                            imprime set
-***********************************************************************/
-void imp_set(set v){
-  printf("%X\n",v.p1);
-  printf("%X \n",v.p2);
-};
 
 void initFirsts(){
   firsts[UT].p1 = CVOID|CINT|CFLOAT|CCHAR;
@@ -95,8 +88,8 @@ void initFirsts(){
   firsts[LDI].p1 = NADA;
   firsts[LDI].p2 = CIDENT;
 
-  firsts[C].p1 = NADA;
-  firsts[C].p2 = CCONS_ENT|CCONS_FLO|CCONS_CAR;
+  firsts[CON].p1 = NADA;
+  firsts[CON].p2 = CCONS_ENT|CCONS_FLO|CCONS_CAR;
 
   firsts[LI].p1= NADA;
   firsts[LI].p2 = CCONS_ENT|CCONS_FLO|CCONS_CAR;
@@ -110,8 +103,8 @@ void initFirsts(){
   firsts[D].p1 = CVOID|CINT|CFLOAT|CCHAR;
   firsts[D].p2 = NADA;
 
-  firsts[P].p1 = CPAR_ABR|CLLA_ABR|CIN|COUT|CIF|CWHILE|CPYCOMA;
-  firsts[P].p2=CCONS_ENT|CCONS_FLO|CCONS_CAR|CCONS_STR|CMAS|CMENOS|CNEG|CIDENT|CRETURN;
+  firsts[PRO].p1 = CPAR_ABR|CLLA_ABR|CIN|COUT|CIF|CWHILE|CPYCOMA;
+  firsts[PRO].p2=CCONS_ENT|CCONS_FLO|CCONS_CAR|CCONS_STR|CMAS|CMENOS|CNEG|CIDENT|CRETURN;
 
   firsts[PE].p1=CPAR_ABR;
   firsts[PE].p2=CCONS_ENT|CCONS_FLO|CCONS_CAR|CCONS_STR|CMAS|CMENOS|CNEG|CIDENT;
@@ -131,8 +124,8 @@ void initFirsts(){
   firsts[PR].p1 = NADA;
   firsts[PR].p2 = CRETURN;
 
-  firsts[V].p1 = NADA;
-  firsts[V].p2 = CIDENT;
+  firsts[VAR].p1 = NADA;
+  firsts[VAR].p2 = CIDENT;
 
   firsts[E].p1 = CPAR_ABR;
   firsts[E].p2 = CCONS_ENT|CCONS_FLO|CCONS_CAR|CCONS_STR|CMAS|CMENOS|CNEG|CIDENT;
@@ -155,29 +148,6 @@ void initFirsts(){
   firsts[LE].p1 = CPAR_ABR;
   firsts[LE].p2 = CCONS_ENT|CCONS_FLO|CCONS_CAR|CCONS_STR|CMAS|CMENOS|CNEG|CIDENT;
 }
-
-/*
-int main () {
-  int result;
-
-  long l1, l2, e;
-  set s1;
-  set s2;
-
-  l2= 0x40000030;
-  l1= 0x00000001;
-
-  s1=cons(l1, l2);
-
-  e=0x40000002;
-  result= in(e, s1);
-
-  imp_set(s1);
-
-  printf("esta %X en el set ? %d\n",e,result);
-}
-
-*/
 
 
 

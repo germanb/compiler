@@ -8,9 +8,9 @@ CND_BUILDDIR=build
 CND_DISTDIR=dist
 # Default configuration
 CND_PLATFORM_Default=GNU-Linux-x86
-CND_ARTIFACT_DIR_Default=.
-CND_ARTIFACT_NAME_Default=ucc
-CND_ARTIFACT_PATH_Default=./ucc
+CND_ARTIFACT_DIR_Default=
+CND_ARTIFACT_NAME_Default=
+CND_ARTIFACT_PATH_Default=
 CND_PACKAGE_DIR_Default=dist/Default/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Default=compiler.tar
-CND_PACKAGE_PATH_Default=dist/Default/GNU-Linux-x86/package/compiler.tar
+CND_PACKAGE_NAME_Default=tercerentrega.tar
+CND_PACKAGE_PATH_Default=dist/Default/GNU-Linux-x86/package/tercerentrega.tar

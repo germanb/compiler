@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=compiler
+PROJECTNAME=tercer entrega
 
 # Active Configuration
 DEFAULTCONF=Default

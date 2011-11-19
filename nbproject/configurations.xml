@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="69">
   <logicalFolder name="root" displayName="root" projectFiles="true">
-    <df name="compiler" root=".">
+    <df name="tercer entrega" root=".">
       <in>codigos.h</in>
       <in>error.c</in>
       <in>error.h</in>
       <in>lex.yy.c</in>
+      <in>p4e.c</in>
       <in>parser.c</in>
-      <in>prueba.c</in>
       <in>scanner.token.lex</in>
+      <in>set.c</in>
+      <in>set.h</in>
+      <in>sistejec.c</in>
+      <in>soporte_ejecucion.h</in>
       <in>ts.c</in>
       <in>ts.h</in>
       <in>var_globales.h</in>
@@ -18,13 +22,13 @@
                    projectFiles="false"
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>Makefile</itemPath>
-      <itemPath>Makefile-compiler.mk</itemPath>
+      <itemPath>Makefile-tercer entrega.mk</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
     <Elem>.</Elem>
   </sourceRootList>
-  <projectmakefile>Makefile-compiler.mk</projectmakefile>
+  <projectmakefile>Makefile-tercer entrega.mk</projectmakefile>
   <confs>
     <conf name="Default" type="0">
       <toolsSet>
@@ -37,7 +41,7 @@
           <buildCommandWorkingDir>.</buildCommandWorkingDir>
           <buildCommand>$(MAKE) -f Makefile</buildCommand>
           <cleanCommand>$(MAKE) -f Makefile clean</cleanCommand>
-          <executablePath>./ucc</executablePath>
+          <executablePath></executablePath>
           <cTool>
             <incDir>
               <pElem>.</pElem>
@@ -45,6 +49,10 @@
           </cTool>
         </makeTool>
       </makefileType>
+      <item path="set.c" ex="true" tool="0">
+      </item>
+      <item path="set.h" ex="true" tool="3">
+      </item>
     </conf>
   </confs>
 </configurationDescriptor>

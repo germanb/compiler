@@ -1,89 +1,80 @@
 /******************************************************************
             Este es el archivo correspondiente al PARSER
-*******************************************************************/
+
+ *******************************************************************/
 
 #define EXTERNA extern
-
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include "codigos.h"
 #include "var_globales.h"
+#include <string.h>
 #include "ts.h"
-#include "set.h"
-#include "error.h"
 #include "soporte_ejecucion.h"
-/*********** prototipos *************/
-
-void unidad_traduccion(set folset);
-void declaraciones(set folset);
-void especificador_tipo(set folset);
-void especificador_declaracion(set folset);
-void definicion_funcion(set folset);
-void declaracion_variable(set folset);
-void lista_declaraciones_param(set folset);
-void declaracion_parametro(set folset);
-void declarador_init(set folset);
-void lista_declaraciones_init(set folset);
-struct Tipo constante();
+#include "set.c"
+#include <stdlib.h>
+void unidad_traduccion();
+void declaraciones();
+void especificador_tipo();
+void especificador_declaracion();
+void definicion_funcion();
+void declaracion_variable();
+void lista_declaraciones_param();
+void declaracion_parametro();
+void declarador_init();
+void lista_declacion_init();
 void lista_inicializadores();
 void lista_proposiciones();
 void lista_declaraciones();
 void declaracion();
 void proposicion();
 void proposicion_expresion();
-void proposicion_compuesta(set folset);
+void proposicion_compuesta();
 void proposicion_seleccion();
 void proposicion_iteracion();
 void proposicion_e_s();
 void proposicion_retorno();
-struct Tipo variable();
-struct Tipo expresion();
 void expresion_asignacion();
 void expresion_relacional();
-struct Tipo expresion_simple();
 void relacion();
-struct Tipo termino();
-struct Tipo factor();
-struct Tipo llamada_funcion();
 void lista_expresiones();
-void test(set cjto1, set cjto2, int n);
-char *getStringINST(int INST);
-
+char *obtenerInst(int INST);
+struct typeAux termino();
+struct typeAux factor();
+struct typeAux llamada_funcion();
+struct typeAux expresion_simple();
+struct typeAux variable();
+struct typeAux expresion();
+struct typeAux constante();
 void scanner ();
-
-/********** variables globales ************/
-
+extern FILE *yyin;
+extern int despl;
+extern float P[];
+extern int lp;
+extern int lc;
+extern char C[];
+extern char error;
 int isReturn= 0;
 int isLlamadafuncion= 0;
 int isINOUT= 0;
 int llamolista_ini= 0;
 int isConstante= 0;
 int isdeffuncion= 0;
-extern char error;
-int vengodeIF =0;
 int sentencia= 0;
 int control= 0;
-
 char *archivo;
-
-char *codigo[15000]; //Para mostrar
-char *codigoMostrar[15000]; //Para mostrar por pantalla
+char *codigo[15000];
+char *codigoMostrar[15000];
 char *newLine;
 int  newLineMAC= 0;
-
 char posID= 0;
 int constEntera= -1;
 int cantConstantess= 0;
 int cantParametros= 0;
 int en_tabla_funcion= NIL;
 int en_tabla_funcion_Llama= NIL;
-
 int segVar= 2;
 
-
 token *sbol;
-
 
 int posTabla;
 int cantPar;
@@ -91,59 +82,65 @@ int tamARR=0;
 char lexema[17];
 int bandera;
 int posicionTS;
-int esParametro = 0;
+int esParametro = 0;			
 char *archivo;
-
 
 int esIndice = 0;
 
 enum noTerminales{
-lista_declaracion_de_parametro, definicion_de_funcio, lista_declaraciones_ini, lista_de_inicializadore, proposicion_compuest, lista_de_proposicione, proposicio,proposicion_de_iteracio, proposicion_de_seleccio, proposicion_e_, proposicion_de_retorn, proposicion_expresio, expresio,declaracione, especificador_de_tip, expresion_simpl, lista_de_expresione, termin, facto, variabl, llamada_a_funcio, declaracion_de_parametr, lista_de_declaracione, declaracio, especificador_de_declaracione,relacio, declaracion_de_variabl, constant, declarador_ini, unidad_traduccio
+    lista_declaracion_de_parametro,
+    definicion_de_funcio,
+    lista_declaraciones_ini,
+    lista_de_inicializadore,
+    proposicion_compuest,
+    lista_de_proposicione,
+    proposicio,
+    proposicion_de_iteracio,
+    proposicion_de_seleccio,
+    proposicion_e_,
+    proposicion_de_retorn,
+    proposicion_expresio,
+    expresio,
+    declaracione,
+    especificador_de_tip,
+    expresion_simpl,
+    lista_de_expresione,
+    termin,
+    facto,
+    variabl,
+    llamada_a_funcio,
+    declaracion_de_parametr,
+    lista_de_declaracione,
+    declaracio,
+    especificador_de_declaracione,
+    relacio,
+    declaracion_de_variabl,
+    constant,
+    declarador_ini,
+    unidad_traduccio
 };
 
-enum typeExpresion {variables,
-unaVariable,
-Constant,
-vars_consts,
-funcion,
-Const_iToStr};
+enum typeExpresion {
+    variables,
+    unaVariable,
+    Constant,
+    vars_consts,
+    funcion,
+    Const_iToStr
+};
 
-
-extern FILE *yyin;
-extern int despl;
-
-extern float P[];
-extern int lp;
-extern int lc;
-extern char C[];
-//flag para ver si tiene return una funcion
-int return_flag;
-int function_call_flag = 0;
-int ident_not_exists_flag = 0;
- int void_flag;
 void scanner() {
   int i;
-
   for (;(i=yylex())!= NADA && sbol->codigo == SEGUIR;);
-  if (i == NADA){
-      nro_linea++;
-      sbol->codigo = CEOF;
-  }else{
-    liberar = linea;
-    linea = (char *) malloc (strlen(linea) + strlen (token1.lexema) + 3);
-    strcpy(linea, liberar);
-    strcat(linea, token1.lexema);
-    free ( (void *) liberar);
-  }
-
-  /* yylex retorna 0 si llego a fin de archivo */
-
-
-
-  /* El alumno debera dar una solucion al problema que las constantes
-    enteras y flotantes son entregadas como strings al parser */
+  if (i == NADA) sbol->codigo = CEOF;
+  liberar = linea;
+  linea = (char *) malloc (strlen(linea) + strlen (token1.lexema) + 3);
+  strcpy(linea, liberar);
+  strcat(linea, token1.lexema);
+  free ( (void *) liberar);
 }
-struct Tipo{
+
+struct typeAux{
     enum    typeExpresion typeExpresionresion;
     int    tipo;
     int    tipo_base;
@@ -152,6 +149,8 @@ struct Tipo{
     int     nivel;
     int     despl;
 };
+
+
 int toInt(char t[]){
 int res= 0, Ti= strlen(t)-1, piso= 0;
 
@@ -183,8 +182,8 @@ char *deReversa(char cadena[]){
 char *concatString(char s1[], char s2[]){
     newLine= (char *) calloc(1, 50);
     strcat(newLine, s1);
-    strcat(newLine, " ");
-
+    strcat(newLine, " ");	
+    
     return strcat(newLine, s2);;
 }
 
@@ -194,7 +193,6 @@ char *unionST(char s1[], char s2[]){
     return strcat(newLine, s2);
 }
 
-//**********************************************************
 char *strmplN(char *s1){
     int i,j;
 
@@ -222,10 +220,8 @@ char *strmplT(char *s1){
 
     return s1;
 }
-//**********************************************************
 
-
-char *iToStr(int num){
+char *iToStr(int num){	
 char *salida= (char *)calloc (1, TAM_LEXEMA);
 int i=0;
 if (num >= 0){
@@ -244,11 +240,8 @@ return unionST("-",iToStr(-num));
 }
 
 void appendMAC(int INST, char linea[]){
-    //printf("INSTI string:  %s\n", iToStr(INST));
-    //printf("INSTI:  %d\n", INST);
     codigo[newLineMAC]= concatString(iToStr(INST),linea);
-    //codigo[newLineMAC]= concatString(linea,iToStr(INST));
-    codigoMostrar[newLineMAC++]= concatString(getStringINST(INST),linea);
+    codigoMostrar[newLineMAC++]= concatString(obtenerInst(INST),linea);
 }
 
 void appendKMAC(int INST, char linea[], int kLinea){
@@ -259,14 +252,14 @@ void appendKMAC(int INST, char linea[], int kLinea){
         codigoMostrar[i+1]= codigoMostrar[i];
     }
     codigo[kLinea]= concatString(iToStr(INST),linea);
-    codigoMostrar[kLinea]= concatString(getStringINST(INST),linea);
+    codigoMostrar[kLinea]= concatString(obtenerInst(INST),linea);
 
     newLineMAC++;
 }
 
 void appendParam(tipo_inf_res *info_param){
     tipo_inf_res *cur;
-
+    
     cur= ts[en_tabla_funcion].ets->desc.part_var.sub.ptr_inf_res;
 
     if (cur == NULL)
@@ -282,7 +275,7 @@ void appendParam(tipo_inf_res *info_param){
 tipo_inf_res getParam(int k){
     int i;
     tipo_inf_res *cur, salida;
-
+    
     cur= ts[en_tabla_funcion_Llama].ets->desc.part_var.sub.ptr_inf_res;
 
     for (i= 1; i <= k && cur != NULL; i++){
@@ -292,21 +285,13 @@ tipo_inf_res getParam(int k){
     return salida;
 }
 
-void chequeoParam(struct Tipo parametroReal, int numParametro){
+void chequeoParam(struct typeAux parametroReal, int numParametro){
     tipo_inf_res parametroFormal;
-
-  //  printf("numero de parametro..........       %d\n",numParametro);
 
     if (numParametro <= ts[en_tabla_funcion_Llama].ets->desc.part_var.sub.cant_par){
 
         parametroFormal = getParam(numParametro);
 
-        // printf("NUMERO PARAMETRO(%d)\n",numParametro);
-	/*
-	printf("%d\n",parametroFormal.ptero_tipo_base);
-	printf("%d\n",parametroFormal.ptero_tipo);
-	printf("%c\n",parametroFormal.tipo_pje);
-	*/
 
         if (parametroFormal.ptero_tipo == en_tabla("TIPOARREGLO")){
 
@@ -314,47 +299,36 @@ void chequeoParam(struct Tipo parametroReal, int numParametro){
                 error_handler(91);
             else
             if (parametroReal.tipo != en_tabla("TIPOARREGLO") || (parametroReal.tipo_base != parametroFormal.ptero_tipo_base)){
-
-                //printf("\n\n\nparametro real tipo... %d\n",parametroReal.tipo);
-		//printf("posicion del tipo arreglo... %d\n",		en_tabla("TIPOARREGLO"));
-
-                 //printf("numero de parametro... %d\n\n\n\n\n",numParametro);
-		//printf("parametro real tipo base... %d\n",parametroReal.tipo_base);
-                //printf("parametro formal tipo base... %d\n",parametroFormal.ptero_tipo_base);
-
-                 //printf("arribaaaaaaaaaaaaa %d\n\n\n\n\n",numParametro);
+                            
                 error_handler(90);
 		}
-        }else{
+        }else{ 
 
             if (parametroReal.tipo == en_tabla("TIPOARREGLO"))
                 error_handler(90);
             else
             if (parametroFormal.tipo_pje == 'r' && parametroReal.typeExpresionresion != unaVariable)
                 error_handler(92);
-
+            
 	if (parametroFormal.ptero_tipo == en_tabla("float") && (parametroReal.tipo == en_tabla("float") || parametroReal.tipo == en_tabla("char") || 				parametroReal.tipo == en_tabla("int"))){return;}
-		else //error_handler(90);
+		else 
 
 	if (parametroFormal.ptero_tipo == en_tabla("int") && (parametroReal.tipo == en_tabla("char") || parametroReal.tipo == en_tabla("int"))){return;}
-		else //error_handler(90);
+		else 
 		if (parametroFormal.ptero_tipo == en_tabla("char") && parametroReal.tipo == en_tabla("char") ){return;}
-		else error_handler(90);
+		else error_handler(90);	
 		}
-
 
     }
 }
 
 float charToFloat(char num[]){
-
     char part_ent[strlen(num)+1], part_dec[strlen(num)+1];
     int punto= 0;
     float res= 0;
     int i, decimales, piso= 0;
 
-
-    if (num[0]== '-') piso= 1;//Si es negativo
+    if (num[0]== '-') piso= 1;
 
     part_ent[0]= part_dec[0]= '0';
     part_ent[1]= part_dec[1]= 0;
@@ -371,10 +345,10 @@ float charToFloat(char num[]){
     }
     decimales= strlen(part_dec);
     res= (toInt(strcat(part_ent, part_dec))+.0)/elev(10, decimales);
-
+    
     return (num[0]== '-')? -res : res;
 }
-void clearLMAC(){
+void clearLMAC(){ 
     codigo[newLineMAC-1]= NULL;
     codigoMostrar[--newLineMAC]= NULL;
 }
@@ -394,104 +368,33 @@ void clearKLMAC(int kLinea){
 
 void verInstrucciones(){
     int i;
-
     printf("\n\n MAC:\n\n\n");
-
     for (i= 0; i < newLineMAC; i++){
-        //printf("CODIGO %d: %s\n", i, codigo[i]);
-        printf("Linea %d: %s\n", i+1, codigoMostrar[i]);
+
+        printf("Linea %d: %s\n", i+1, codigoMostrar[i]);    	
     }
-
-
     printf("\n******************\n");
 }
 
-/*
-void generarSalida(){
-
-printf("ffffffffffffffffff");
-FILE *PObj;
-
-
-if ((PObj= fopen(strcat(archivo, ".o"), "w")) != NULL){
-int i;
-
-for (i= 0; i < dameCS(); i++)
-	fprintf(PObj, "%c\n", dameC(i));
-
-//fprintf(PObj, "$ ");
-
-for (i= 0; i < newLineMAC; i++)
-	fprintf(PObj, "%s\n", codigoMostrar[i]);
-
-for (i= 0; i < newLineMAC; i++)
-	printf(dameC(i));
-
-	}
-fclose(PObj);
-}
-*/
-
-
-
-
 void generarSalida(){
 FILE *PObj;
-char arreglo[500];
 int j;
-int t;
-int index,index2;
-char aux;
-char arreglo1[30];
-char arreglo2[30];
-int banderasa = 0;
 if ((PObj= fopen(strcat(archivo, ".o"), "w")) != NULL){
 	int i;
-        //printf("dameCS:_________________ %c\n", dameCS());
+        
 	fprintf(PObj, "$ ");
-        for (i= 0; i < newLineMAC; i++){
-                //index2=0;
-                //strcpy(arreglo1,codigo[i]);
-                //printf("arreglo: %s\n", arreglo1);
-		/*for(index = 0; arreglo1[index]!='\0'; index++){
-			if(arreglo1[index]!= '_'){
-				arreglo2[index2++] = arreglo1[index];
-				banderasa=1;
-
-			}else{
-				banderasa=0;
-                                printf("arreglo2: %s\n", arreglo2);
-                                arreglo2[index2]='\0';
-				fprintf(PObj, "%f\n", charToFloat(arreglo2));
-                                index2=0; arreglo2[0]='\0';
-
-			}
-
-		}*/
-	         //printf("arreglo2: %s\n", codigo[i]);
-        	fprintf(PObj, "%s\n", codigo[i]);
+        for (i= 0; i < newLineMAC; i++){ 
+        	fprintf(PObj, "%s\n", codigo[i]);                         
         }
 
-	fprintf(PObj, "$ ");
+	fprintf(PObj, "$ "); 
 
+        for (i= 0,j=0; i < dameCS(); i++){ 
 
-	//for(t=0;t<150;t++) printf("arreglo");
-
-        for (i= 0,j=0; i < dameCS(); i++){
-        //for (i= 0,j=0; i < dameCS()-1; i++){
-        	//aux = dameC(i);
-        	//printf("dameC metodo:               %c\n", dameC(i));
-        	//printf("aux:               %c\n", aux);
-        	//arreglo[j] = aux;
 		 fprintf(PObj, "%d\n", dameC(i));
-                //fwrite(&aux, sizeof(char), 1,PObj);
 	}
-       	fprintf(PObj, "$ ");
-	//for(t=0;t<150;t++) printf("arreglo %c\n", arreglo[t]);
-        //printf("arreglo %s\n", *arreglo);
+       	fprintf(PObj, "$ "); 
 
-        //aux =   "$";
-        //fwrite(&aux, sizeof(char), 1,PObj);
 	}
 fclose(PObj);
 }
@@ -548,7 +451,7 @@ char getTipo(char tipo){
     }
 }
 
-char *getStringINST(int INST){
+char *obtenerInst(int INST){
     char *sINST= (char *)calloc (1, 13);
     strcpy(sINST, ">>ERROR<<");
     switch(INST){
@@ -569,8 +472,8 @@ char *getStringINST(int INST){
         case CMIG   : strcpy(sINST, sCMIG); break;
         case CMAI   : strcpy(sINST, sCMAI); break;
         case CMEI   : strcpy(sINST, sCMEI); break;
-        case CMNI   : strcpy(sINST, sCMNI); break;
-        case ALM    : strcpy(sINST, sALM); break;
+        case CMNI   : strcpy(sINST, sCMNI); break;        
+        case ALM    : strcpy(sINST, sALM); break;        
         case LEER   : strcpy(sINST, sLEER); break;
         case IMPR   : strcpy(sINST, sIMPR); break;
         case BIFF   : strcpy(sINST, sBIFF); break;
@@ -589,7 +492,7 @@ char *getStringINST(int INST){
         case FINB   : strcpy(sINST, sFINB); break;
         case IMPCS  : strcpy(sINST, sIMPCS); break;
         case CRCTS  : strcpy(sINST, sCRCTS);
-    }
+    }    
     return sINST;
 }
 
@@ -598,7 +501,6 @@ void compilacion(){
     sbol=&token1 ;
 
     appendMAC(INPP,"");
-    //appendMAC(ENBL, iToStr(get_nivel()));
 
     printf("\nCOMPILACION\n");
 
@@ -620,11 +522,10 @@ void compilacion(){
                             error_handler(35);
                             error_handler(COD_IMP_ERRORES);
                     }
-
-
+	
+	
     if (sbol->codigo != CEOF) error_handler(8);
     printf("\n\n\nCOMPILACION CORRECTA\n\n\n\n");
-    //appendMAC(FINB, iToStr(get_nivel()));
     appendMAC(PARAR,"");
     if (error == 0){
         verInstrucciones();
@@ -632,120 +533,123 @@ void compilacion(){
     }
 }
 
-/*
-void ejecucion(){
-    //int j =0;
-    FILE *PObj;
-    char cur[25];
-    printf("archivo:   %s\n",strcat(archivo, ".o"));
-    PObj= fopen(strcat(archivo, ".o"), "r");
-    if (PObj!= NULL){
-      //  printf("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-       // while(j<=1000000){
-        // printf("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-        //  j++;
-     //	}
-        int i;
-        fscanf(PObj, "%s", cur);
-        //fgets (cur , 20,PObj);
-        //printf("cur: %s",&cur);
-       // for (i= 0; cur!=NULL ; i++){
-        //for (i= 0; strcmp(cur, "$"); i++){
-            addC(toInt(cur));
-            fscanf(PObj, "%s", cur);
-        }
-
-       //for (i= 0; strcmp(cur, "$"); i++){
-     //   addC(toInt(cur));
-           // fscanf(PObj, "%s", cur);
-     // }
-
-     //    fscanf(PObj, "%s", cur);
-
-     //        float val = -1;
-     //        for (i = 0; !feof(PObj); i++) {
-     //	       printf("cur: %s",cur);
-     //            //val = P[i];
-     //
-     //              }
-
-        // while(!feof(PObj)){
-         for (i= 0;!feof(PObj); i++){
-            float cod;
-
-             cod= charToFloat(cur);
-            //printf("floAT: %f",&cod);
-	    //fgets (cur ,100,PObj);
-            printf("cur: %s",cur);
-            pushP(&cod);
-
-            fscanf(PObj, "%s", cur);
-        }
-    }else{
-          //printf("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
-    }
-
-    fclose(PObj);
-
-    interprete();
-
-}
-
-*/
-
-
 void ejecucion(){
     float cod;
     FILE *PObj;
-    char cur[500];
-    int kk;
-
+    char cur[500];	
     if ((PObj= fopen(strcat(archivo, ".o"), "r")) != NULL){
         int i;
-//      for(kk=0;kk<10000;kk++)printf("aaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
+        fscanf(PObj, "%s", cur);
+        fscanf(PObj, "%s", cur);   
 
-        fscanf(PObj, "%s", &cur);
-        fscanf(PObj, "%s", &cur);
-	//for(kk=0;kk<10000;kk++) printf("PASOOOOOOOOOOOOO\n");
         for (i= 0; strcmp(cur, "$"); i++){
             cod= charToFloat(cur);
-           //  printf("COD: %f\n",cod);
-           // printf("CUR: %s\n",cur);
-            //pushP(&cod);                 // 1) Cargar Instruccion
 
             P[i] = cod;
             lp++;
-            fscanf(PObj, "%s", &cur);    // 2) Leer otra Instruccion
+            fscanf(PObj, "%s", cur);    
         }
 
-       // for(kk=0;kk<10000;kk++) printf("PASOOOOOOOOOOOOOFUERAAAAAAAAAA\n");
-
-        fscanf(PObj, "%s", &cur);
-
-       for (i= 0; strcmp(cur, "$"); i++){   // 1) Leer y Cargar las Constanes de Strings
-            addC(toInt(cur));
-            fscanf(PObj, "%s", &cur);
+        fscanf(PObj, "%s", cur);
+ 
+       for (i= 0; strcmp(cur, "$"); i++){ 
+            addC(toInt(cur));            
+            fscanf(PObj, "%s", cur);
         }
+    	
 
-     /*
-     float val = -1;
-                for (i = 0; val != PARAR; i++) {
-                    fscanf(obj, "%f\n", &P[i]);
-                    val = P[i];
-     }
-    */
     //for(kk=0;kk<200;kk++) printf("P: %f\n",P[kk]);
     //for(kk=0;kk<200;kk++) printf("C: %c\n",C[kk]);
     }
-    fclose(PObj);
-    //28352
+    fclose(PObj);   
+
     interprete2();
 }
 
+set first(enum noTerminales not){
+	switch(not){
+	case declaracione:
+		return cons(CINT|CFLOAT|CVOID|CCHAR,NADA);			
+	case especificador_de_tip:
+		return cons(CINT|CFLOAT|CVOID|CCHAR,NADA);	
+	case especificador_de_declaracione:
+		return cons(CPAR_ABR|CASIGNAC|CCOR_ABR|CCOMA|CPYCOMA, NADA);
+ 	case definicion_de_funcio:
+		return cons(CPAR_ABR ,NADA);	
+	case lista_declaracion_de_parametro:
+		return cons(CINT|CFLOAT|CVOID|CCHAR,NADA);		
+	case declaracion_de_parametr:
+		return cons(CINT|CFLOAT|CVOID|CCHAR,NADA);		
+	case declaracion_de_variabl:
+		return cons(CASIGNAC|CCOR_ABR|CCOMA|CPYCOMA, NADA);
+            case lista_declaraciones_ini:
+		return cons(NADA,CIDENT);				
+	case declarador_ini:
+        	return cons(CASIGNAC|CCOR_ABR, NADA);
+	
+	case lista_de_inicializadore:
+		return cons(NADA,CCONS_FLO|CCONS_CAR|CCONS_ENT);	
+	
+	case proposicion_compuest:
+		return cons(CLLA_ABR,NADA);
+	
+	case lista_de_declaracione:
+		return cons(CINT|CFLOAT|CVOID|CCHAR,NADA);	
+	case declaracio:
+		return cons(CINT|CFLOAT|CVOID|CCHAR,NADA);		
+	case lista_de_proposicione:
+		return cons(CWHILE|CIF|CIN|COUT|CLLA_ABR|CPAR_ABR,CMAS|CMENOS|CIDENT|CCONS_FLO|CCONS_CAR|CCONS_ENT|CNEG|CCONS_STR|CRETURN);				
+	case proposicio:
+		return cons(CWHILE|CIF|CIN|COUT|CLLA_ABR|CPAR_ABR|CPYCOMA,CMAS|CMENOS|CIDENT|CCONS_FLO|CCONS_CAR|CCONS_ENT|CNEG|CCONS_STR|CRETURN);				
+	case proposicion_de_iteracio:
+		return cons(CWHILE,NADA);
+	case proposicion_de_seleccio:
+		return cons(CIF,NADA);	
+	case proposicion_de_retorn:
+		return cons(NADA,CRETURN);	
+	case proposicion_expresio:
+		return cons(CPAR_ABR|CPYCOMA, CMAS|CMENOS|CIDENT|CCONS_ENT|CCONS_FLO|CCONS_CAR|CNEG|CCONS_STR);	
+	case expresio:
+		return cons(CPAR_ABR,CMAS|CMENOS|CIDENT|CCONS_ENT|CCONS_FLO|CCONS_CAR|CNEG|CCONS_STR);				
+	case relacio:
+		return cons(NADA,CMAYOR|CMENOR|CIGUAL|CMEIG|CMAIG|CDISTINTO);	
+	case expresion_simpl:
+		return cons(CPAR_ABR,CMAS|CMENOS|CIDENT|CCONS_ENT|CCONS_FLO|CCONS_CAR|CNEG|CCONS_STR);	
+	case termin:
+		return cons(CPAR_ABR,CIDENT|CCONS_ENT|CCONS_FLO|CCONS_CAR|CNEG|CCONS_STR);	
+
+	case facto:
+		return cons(CPAR_ABR,CIDENT|CCONS_ENT|CCONS_FLO|CCONS_CAR|CNEG|CCONS_STR);
+	
+	case variabl:
+		 return cons(NADA,CIDENT);
+	
+	case llamada_a_funcio:
+		 return cons(NADA,CIDENT);
+	
+	case lista_de_expresione:
+  		return cons(CPAR_ABR,CMAS|CMENOS|CCONS_ENT|CCONS_FLO|CCONS_CAR|CIDENT|CNEG|CCONS_STR);
+	
+	case constant:
+		return cons(NADA,CCONS_ENT|CCONS_FLO|CCONS_CAR);
+	
+	default:	        	
+		return cons(NADA,NADA);	
+		 
+    }
+
+}
 
 
-
-
+void test(set conjunto, set puntosRecuperacion, int error){
+    if(in(sbol->codigo, conjunto)==0){
+        error_handler(error);	
+        conjunto=une(conjunto, puntosRecuperacion);
+        while (in(sbol->codigo,conjunto)==0){
+            scanner();
+	}
+    }
+}
 
 int main( int argc,char *argv[]) {
 
@@ -768,397 +672,400 @@ linea = (char *) malloc (2);
         archivo= argv[2];
         *(archivo + strlen(archivo)-2)= 0;
     }
-
-    if (argv[1][1] == 'c'){
+    initFirsts();
+    if (argv[1][1] == 'c'){ 
                 compilacion();
-
+	
 	}
-    else if (argv[1][1] == 'e'){
-
+    else if (argv[1][1] == 'e'){  
+        
         ejecucion();
 
 	}
 }
 
+int chartoInt(char str[]){
+	int num;
+	
+	num = atoi(str); 
+
+return num;
+}
 
 /********* funciones del parser ***********/
 
 void unidad_traduccion(set folset){
-
-  test(une(folset,firsts[UT]),folset,50);
-
-  while (sbol->codigo == CVOID || sbol->codigo == CCHAR ||
-         sbol->codigo == CINT || sbol->codigo == CFLOAT)
-    declaraciones(une(folset,firsts[DE]));
+	test(firsts[DE],folset,50);				
+	while (sbol->codigo == CVOID || sbol->codigo == CCHAR || sbol->codigo == CINT || sbol->codigo == CFLOAT) {
+		declaraciones(une(folset,firsts[DE]));
+		test(firsts[DE],folset,51);	
+	}
 }
 
 void declaraciones(set folset){
-  especificador_tipo(une(une(folset,cons(NADA,CIDENT)), firsts[ED]));
-  if (sbol->codigo == CIDENT){
-      strcpy(inf_id->nbre,sbol->lexema);
-      scanner();
-  }
-  else {
-      error_handler(16);
-      ident_not_exists_flag = 1;
-  }
-  especificador_declaracion(folset);
+	especificador_tipo(une(folset,une(cons(NADA,CIDENT),firsts[ED])));
+	if (sbol->codigo == CIDENT){    
+		strcpy(inf_id->nbre,sbol->lexema);
+		scanner();
+	}else error_handler(16);
+	especificador_declaracion(folset);
+
 }
 
 void especificador_tipo(set folset){
 
-    test(firsts[ET],folset,51);
-
-    inf_id->ptr_tipo = en_tabla(sbol->lexema);
-    switch (sbol->codigo) {
-    case CVOID:{
+  test(firsts[ET],folset,51);	
+  switch (sbol->codigo) {
+    case CVOID:{ 
 	scanner();
 	posID=en_tabla("void");
-	break;}
-    case CCHAR:{
-	scanner();
+	break;}    
+    case CCHAR:{ 
+	scanner(); 
 	posID=en_tabla("char");
 	break;}
-    case CINT:{
-	scanner();
+    case CINT:{ 
+	scanner(); 
 	posID=en_tabla("int");
-	break;}
-    case CFLOAT:{
-	scanner();
+	break;}    
+    case CFLOAT:{ 
+	scanner(); 
 	posID=en_tabla("float");
-	break;}
-     default: error_handler(17);
-    }
-
-    test(folset, cons(NADA,NADA), 52);
-
+	break;}    
+    default: error_handler(17);
+  }
+  test(folset,cons(NADA,NADA),52);	
 }
 
-void especificador_declaracion(set folset){
-  test(firsts[ED],folset, 53);
-
+void especificador_declaracion(set folset){ 
+  test(firsts[ED],folset,53);	
   switch (sbol->codigo) {
-    case CPAR_ABR: {
-        definicion_funcion(folset);
-        break;}
+    case CPAR_ABR:{
+          definicion_funcion(folset); 
+          break;}
     case CASIGNAC:
     case CCOR_ABR:
     case CCOMA:
-    case CPYCOMA: { declaracion_variable(folset); break;}
+    case CPYCOMA:{ declaracion_variable(folset); break;   }
     default: error_handler(18);
   }
-
+test(folset, cons(NADA,NADA), 54);
 }
-entrada_TS  *inf_id_aux;
+
 void definicion_funcion(set folset){
+        isdeffuncion= 1;
+	isReturn= 0;
+	inf_id->clase = CLASFUNC;
+	inf_id->ptr_tipo = posID;
+	inf_id->cant_byte = ts[posID].ets->cant_byte;
 
-  if (sbol->codigo == CPAR_ABR) scanner();
-  else error_handler(19);
+	en_tabla_funcion= insertarTS();        
+	pushTB();
 
-  if(!strcmp(inf_id->nbre,"main") && (inf_id->ptr_tipo != en_tabla("void"))){
-     error_handler(35);
-  }
+	if (sbol->codigo == CPAR_ABR) scanner();
+	else error_handler(19);
 
-  void_flag = (inf_id->ptr_tipo == en_tabla("void"));
+	cantParametros= 0;
 
-  inf_id_aux = inf_id;
+	if (sbol->codigo == CVOID || sbol->codigo == CCHAR || 
+            sbol->codigo == CINT  || sbol->codigo == CFLOAT || sbol->codigo == CIDENT)
+                lista_declaraciones_param(une(une(cons(CPAR_CIE,NADA),folset),firsts[PC]));
 
-  if(ident_not_exists_flag == 0){
-    inf_id->clase = CLASFUNC;
-    insertarTS();
-  }else{
-      ident_not_exists_flag = 0;
-  }
+	ts[en_tabla_funcion].ets->desc.part_var.sub.cant_par= cantParametros;
+	
+	if (sbol->codigo == CPAR_CIE) scanner();
+	else error_handler(20);
 
-  pushTB();
-  if (sbol->codigo == CVOID || sbol->codigo == CCHAR ||
-      sbol->codigo == CINT || sbol->codigo == CFLOAT || sbol->codigo == CIDENT || sbol->codigo == CAMPER ) {
-
-      lista_declaraciones_param(une(folset, une(firsts[PC], cons(CPAR_CIE,NADA))));
-
-      int main_pos = en_tabla("main");
-      if(main_pos != NIL){
-        entrada_TS main = * ts[main_pos].ets;
-        if(main.desc.part_var.sub.cant_par){
-            error_handler(36);
-        }
-      }
-  }
-
-  if (sbol->codigo == CPAR_CIE) scanner();
-  else error_handler(20);
-
-  return_flag = 0;
-  proposicion_compuesta(folset);
-
-  if (!void_flag && !return_flag) {
-     error_handler(37);
-  }
-
-  if (sbol->codigo == CLLA_CIE){
-    scanner();
-  }
-  pop_nivel();
-
-  //por que sacamos el scanner de proposicion compuesta pongo el test aca
-  test(folset,cons(NADA,NADA),61);
-
+	proposicion_compuesta(folset);
+        en_tabla_funcion= NIL;
 }
 
 void lista_declaraciones_param(set folset){
 
-  declaracion_parametro(une(folset,une(cons(CCOMA,NADA),firsts[DP])));
+  declaracion_parametro(une(une(cons(CCOMA,NADA),folset),firsts[DP]));	
 
-  tipo_inf_res * eslabon = (tipo_inf_res *) calloc (1,sizeof(tipo_inf_res));
-  eslabon->ptero_tipo = inf_id->ptr_tipo;
-  eslabon->tipo_pje = inf_id->desc.part_var.tipo_pje;
-  inf_id_aux->desc.part_var.sub.ptr_inf_res = eslabon;
-  inf_id_aux->desc.part_var.sub.cant_par = 1;
-  inf_id->clase = CLASPAR;
-  insertarTS();
-  while (sbol->codigo ==CCOMA || in(sbol->codigo, firsts[DP])) {
-
-      if(in(sbol->codigo, firsts[DP])){
-          error_handler(75);
-      }else{
-           scanner();
-      }
-      
-      declaracion_parametro(une(folset,une(cons(CCOMA,NADA),firsts[DP])));
-      tipo_inf_res * eslabon = (tipo_inf_res *) calloc (1,sizeof(tipo_inf_res));
-      eslabon->ptero_tipo = inf_id->ptr_tipo;
-      eslabon->tipo_pje = inf_id->desc.part_var.tipo_pje;
-      tipo_inf_res * eslabonAux = inf_id_aux->desc.part_var.sub.ptr_inf_res;
-      while(eslabonAux->ptr_sig != NULL){
-          eslabonAux = eslabonAux->ptr_sig;
-      }
-      eslabonAux->ptr_sig = eslabon;
-      inf_id_aux->desc.part_var.sub.ptr_inf_res = eslabon;
-      inf_id_aux->desc.part_var.sub.cant_par++;
-      inf_id->clase = CLASPAR;
-      insertarTS();
-
+  while (sbol->codigo ==CCOMA|| in(sbol->codigo,firsts[DP])) {     
+        if(in(sbol->codigo,firsts[DP])){
+				error_handler(75);	
+	}else scanner();
+        declaracion_parametro(une(une(cons(CCOMA,NADA),folset),firsts[DP]));	
     }
-
-}
-
-void declaracion_parametro(set folset) {
-
-    tipo_inf_res *info_res_param= NULL;
-    info_res_param= (tipo_inf_res *) calloc(1, sizeof(tipo_inf_res));
-
-  especificador_tipo(une(folset,cons(CAMPER|CCOR_ABR|CCOR_CIE,CIDENT)));
-
-  if (sbol->codigo == CAMPER){
-      inf_id->desc.part_var.tipo_pje = PAR_REFERENCIA;
-       inf_id->cant_byte = ts[en_tabla("int")].ets->cant_byte;
-      scanner();
-  }else{
-      inf_id->desc.part_var.tipo_pje = PAR_VALOR;
-       inf_id->cant_byte = ts[posID].ets->cant_byte;
-
-  }
-  if (sbol->codigo == CIDENT){
-      strcpy(inf_id->nbre,sbol->lexema);
-      scanner();
-  }
-  else error_handler(16);
-
-  if (sbol->codigo == CCOR_ABR){
-
-      inf_id->desc.part_var.tipo_pje = PAR_REFERENCIA;
-
-      scanner();
-
-      inf_id->desc.part_var.arr.ptero_tipo_base = inf_id->ptr_tipo;
-      inf_id->ptr_tipo = en_tabla("TIPOARREGLO");
-
-      if (sbol->codigo == CCOR_CIE){
-          scanner();
-      }
-      else error_handler(21);
-  }
-  test(folset,cons(CCOMA,NADA),55);
+  
 }
 
 void lista_declaraciones_init(set folset){
-  test(firsts[LDI],une(une(folset,firsts[DI]),cons(CCOMA,CIDENT)),57);
 
+  test(firsts[LDI], une(une(folset, cons(CCOMA, NADA)), firsts[DI]), 57);
   if (sbol->codigo == CIDENT){
-      strcpy(inf_id->nbre,sbol->lexema);
-      scanner();
+	strcpy(inf_id->nbre,sbol->lexema);       
+	scanner();	
+  }else error_handler(16);
+  
+  declarador_init(une(une(cons(CCOMA,CIDENT),firsts[DI]),folset));
+
+  while (sbol->codigo == CCOMA || sbol->codigo == CIDENT) {
+		
+		if(sbol->codigo == CIDENT){
+			error_handler(75);
+		}else scanner();
+    		if (sbol->codigo == CIDENT){ 		
+                		strcpy(inf_id->nbre,sbol->lexema);
+                		scanner();
+    		}else error_handler(16);
+  
+    		declarador_init(une(une(cons(CCOMA,CIDENT),firsts[DI]),folset));
   }
-  else error_handler(16);
 
-  declarador_init(une(folset,une(cons(CCOMA,CIDENT),firsts[DI])));
-  inf_id->clase = CLASVAR;
-  int aux;
-  if(inf_id->ptr_tipo == en_tabla("TIPOARREGLO")){
-    aux = inf_id->desc.part_var.arr.ptero_tipo_base;
-  }else{
-    aux = inf_id->ptr_tipo;
-  }
-
-  while (sbol->codigo == CCOMA) {
-      insertarTS();
-      inf_id->ptr_tipo = aux;
-      scanner();
-
-    if (sbol->codigo == CIDENT){
-         strcpy(inf_id->nbre,sbol->lexema);
-        scanner();
-    }
-    else error_handler(16);
-
-    declarador_init(une(folset,une(cons(CCOMA,CIDENT),firsts[DI])));
-  }
 }
 
 
-void declaracion_variable(set folset){
+void declaracion_parametro(set folset) {	
+    tipo_inf_res *info_res_param= NULL;
+    info_res_param= (tipo_inf_res *) calloc(1, sizeof(tipo_inf_res));    
+    especificador_tipo(une(folset,cons(CAMPER|CCOR_ABR|CCOR_CIE, CIDENT)));
+    inf_id->clase = CLASPAR;
+    if (posID == en_tabla("void")){
+        error_handler(82);
+        inf_id->ptr_tipo = en_tabla("TIPOERROR");
+    }else inf_id->ptr_tipo = posID;   
+    if (sbol->codigo == CAMPER){
+            scanner();
+            inf_id->desc.part_var.tipo_pje= 'r';
+            inf_id->cant_byte = ts[en_tabla("int")].ets->cant_byte;
+    }else{
+            inf_id->desc.part_var.tipo_pje= 'v';
+            inf_id->cant_byte = ts[posID].ets->cant_byte;
+    }
+    if (sbol->codigo == CIDENT){
+            strcpy(inf_id->nbre, sbol->lexema);
+            scanner();
+    }else error_handler(16);
+    if (sbol->codigo == CCOR_ABR){
+        if (inf_id->desc.part_var.tipo_pje == 'r')
+            error_handler(89);
 
-  declarador_init(une(une(folset,cons(CCOMA|CPYCOMA,NADA)),firsts[LDI]));
+        inf_id->desc.part_var.tipo_pje == 'r';
+        inf_id->desc.part_var.arr.ptero_tipo_base = inf_id->ptr_tipo;
+        inf_id->ptr_tipo = en_tabla("TIPOARREGLO");
+        
+        scanner();
+        if (sbol->codigo == CCOR_CIE) scanner();
+        else error_handler(21);
+    }
 
+    cantParametros++;
+    info_res_param->ptero_tipo= inf_id->ptr_tipo;
+    info_res_param->tipo_pje= inf_id->desc.part_var.tipo_pje;
+    info_res_param->ptero_tipo_base = inf_id->desc.part_var.arr.ptero_tipo_base ;
+    info_res_param->ptr_sig= NULL;
+    appendParam(info_res_param);    
+    insertarTS();    
+    test(folset,cons(NADA,NADA), 55);
+}
+
+
+void declaracion_variable(set folset){ 
+  declarador_init(une(une(cons(CCOMA|CPYCOMA,NADA),firsts[LDI]),folset));
+  
   if (sbol->codigo == CCOMA){
-
-      int aux = inf_id->ptr_tipo;
-      inf_id->clase = CLASVAR;
-      insertarTS();
-      inf_id->ptr_tipo = aux;
-      scanner();
-    lista_declaraciones_init(une(folset,cons(CPYCOMA,NADA)));
+    scanner();
+    lista_declaraciones_init(une(folset,cons(CPYCOMA, NADA)));
   }segVar= newLineMAC;
 
-
-  if(ident_not_exists_flag == 0){
-    inf_id->clase = CLASVAR;
-    insertarTS();
-  }else{
-      ident_not_exists_flag = 0;
-  }
-
-  if (sbol->codigo == CPYCOMA){
-      scanner();
-  }
-  else error_handler(22);
-  
-  test(folset,cons(NADA,NADA),62);
+  if (sbol->codigo == CPYCOMA) scanner();
+  else error_handler(22);  
 }
-
 
 void declarador_init(set folset){
-  test(une(folset,firsts[DI]), une(firsts[CON],une(firsts[LI],une(folset,cons(CCOR_CIE|CLLA_ABR|CLLA_CIE, CASIGNAC)))),58);
+    char t;
+    struct typeAux TipoC;
+    TipoC.tipo = NIL;
+    test(une(firsts[DI],folset),firsts[CON],58);   
 
-  if(in(sbol->codigo,firsts[CON])){
-	error_handler(79);
-	constante(folset);
-  }else{
-  switch (sbol->codigo) {
-      case CASIGNAC:{
-               scanner();
-               constante(folset);
-                break;
-      }
-      case CCOR_ABR:{
-              scanner();
-              inf_id->desc.part_var.arr.ptero_tipo_base = inf_id->ptr_tipo;
-              inf_id->ptr_tipo = en_tabla("TIPOARREGLO");
-	      if (sbol->codigo == CCONS_ENT)
-              {
-                  inf_id->desc.part_var.arr.cant_elem = atoi(sbol->lexema);
-                  constante(une(firsts[LI],une(folset,cons(CCOR_CIE, CASIGNAC))));
-              }
-	      if (sbol->codigo == CCOR_CIE) scanner();
-	      else error_handler(21);
+    if (posID == en_tabla("void")){
+        error_handler(82);
+        inf_id->ptr_tipo = en_tabla("TIPOERROR");
+    }else inf_id->ptr_tipo = posID;
 
-	      if (sbol->codigo == CASIGNAC){
-		scanner();
+    inf_id->cant_byte = ts[inf_id->ptr_tipo].ets->cant_byte;
 
-		if (sbol->codigo == CLLA_ABR) scanner();
-		else error_handler(23);
 
-		lista_inicializadores(une(folset,cons(CLLA_CIE,NADA)));
+    if (in(sbol->codigo,firsts[CON])){
+        error_handler(79);
+        constante(folset);
+    }else
+        switch (sbol->codigo) {
+            case CASIGNAC:
+                            scanner();
+                            if(sbol->codigo==CCONS_STR){
+			     scanner();
+	                     error_handler(86);
+			    }
+			    TipoC= constante(folset);   
 
-		if (sbol->codigo == CLLA_CIE) scanner();
-		else error_handler(24);
+                            break;
+            case CCOR_ABR:
+                            scanner();
+                            constEntera= -1;
+                            if (sbol->codigo == CCONS_ENT){
+                                    constEntera= toInt(sbol->lexema);
+                                    if (constEntera <= 0) error_handler(80);
+                                    scanner();
+                            }else{
+				
+                                        scanner();
+			    }
+                            if (sbol->codigo == CCOR_CIE) scanner();
+                            else error_handler(21);
 
-	      }
+                            if (sbol->codigo == CASIGNAC || sbol->codigo == CLLA_ABR){
+                                    if (sbol->codigo == CLLA_ABR) error_handler(79);
+                                    else scanner();
 
-	      break;
-      }
-  }
+                                    if (sbol->codigo == CLLA_ABR)
+                                        scanner();
+                                    else
+                                        error_handler(23);
+
+                                    cantConstantess= 0;
+                                    lista_inicializadores(une(folset, cons(CLLA_CIE, NADA)));
+
+                                    if (constEntera== -1) constEntera= cantConstantess;
+                                    else if (cantConstantess != constEntera) error_handler(94);
+
+                                    if (sbol->codigo == CLLA_CIE) scanner();
+                                    else error_handler(24);
+                            }
+
+                            inf_id->desc.part_var.arr.cant_elem= constEntera;
+
+                            inf_id->desc.part_var.arr.ptero_tipo_base= inf_id->ptr_tipo;
+
+
+                            if (constEntera == -1){  
+                                error_handler(83);
+                                inf_id->desc.part_var.arr.ptero_tipo_base= en_tabla("TIPOERROR");
+                            }
+
+                            inf_id->ptr_tipo = en_tabla("TIPOARREGLO");
+                            inf_id->cant_byte = (inf_id->desc.part_var.arr.cant_elem)*(ts[posID].ets->cant_byte);
+
+                            break;
+        };
+
+    inf_id->clase = CLASVAR;
+
+    inf_id->desc.nivel = get_nivel();  
+
+    inf_id->desc.despl= despl;         
+    despl+= inf_id->cant_byte;
+
+    appendMAC(ALOC, iToStr(inf_id->cant_byte));
+    if (TipoC.tipo != NIL){
+        
+        t= getTipo(inf_id->ptr_tipo);
+
+        if (t == 2)
+            appendMAC(CRCT, concatString(iToStr(t), TipoC.sValor));
+        else
+            appendMAC(CRCT, concatString(iToStr(t), iToStr((int)TipoC.valor)));
+            appendMAC(ALM, concatString(concatString(iToStr(inf_id->desc.nivel),  iToStr(inf_id->desc.despl)), iToStr(t)));
+            appendMAC(POP, iToStr(t));
+    }
+
+    insertarTS();
+    test(folset, cons(NADA,NADA), 59);
 }
- test(folset,cons(NADA,NADA),59);
+
+
+void lista_inicializadores(set folset) { 
+  llamolista_ini= 1;
+  constante(une(une(firsts[CON],folset),cons(CCOMA,NADA)));  
+  llamolista_ini= 0;
+  while (sbol->codigo == CCOMA||in(sbol->codigo,firsts[CON])){
+    if(in(sbol->codigo,firsts[CON])){
+	error_handler(75);
+    }else{ 
+        scanner();
+    }
+  constante(une(une(firsts[CON],folset),cons(CCOMA,NADA)));  
 }
-void lista_inicializadores(set folset) {
-
-  constante(une(folset, une(cons(CCOMA,NADA),firsts[CON])));
-
-  while (sbol->codigo == CCOMA || in(sbol->codigo,firsts[CON])) {
-      if(in(sbol->codigo,firsts[CON])){
-          error_handler(75);
-      }else{
-          scanner();
-      }
-    constante(une(folset, une(cons(CCOMA,NADA),firsts[CON])));
-  }
-
 }
 
 
 void proposicion_compuesta(set folset){
-  test(firsts[PC], une(une(une(folset,firsts[LD]),firsts[LP]),cons(CLLA_CIE, NADA)) ,60);
+   int finBloqueVars;   
 
-  if (sbol->codigo == CLLA_ABR) scanner();
-  else error_handler(23);
+    test(firsts[PC],une(une(une(first(lista_de_declaracione),firsts[LP]),folset),cons(CLLA_CIE,NADA)),60);
+  
+    if (sbol->codigo == CLLA_ABR) scanner();
+    else error_handler(23);
 
-  if (sbol->codigo == CVOID || sbol->codigo == CCHAR ||
-      sbol->codigo == CINT || sbol->codigo == CFLOAT)
+    if (!isdeffuncion)
+            pushTB();
+    else
+        isdeffuncion= 0;
+    
+    appendMAC(ENBL, iToStr(get_nivel()));  
+ 
 
-    lista_declaraciones(une(une(folset,firsts[LP]),cons(CLLA_CIE,NADA)));
 
-  if (sbol->codigo == CLLA_ABR || sbol->codigo == CMAS ||
-      sbol->codigo == CMENOS || sbol->codigo == CIDENT ||
+   if (sbol->codigo == CVOID || sbol->codigo == CCHAR || 
+      sbol->codigo == CINT || sbol->codigo == CFLOAT) 
+
+      lista_declaraciones(une(folset,une(firsts[LP],cons(CLLA_CIE,NADA))));
+
+      finBloqueVars= newLineMAC;
+   if (sbol->codigo == CLLA_ABR || sbol->codigo == CMAS ||
+      sbol->codigo == CMENOS || sbol->codigo == CIDENT || 
       sbol->codigo == CPAR_ABR || sbol->codigo == CNEG ||
       sbol->codigo == CCONS_ENT || sbol->codigo == CCONS_FLO ||
       sbol->codigo == CCONS_CAR || sbol->codigo == CCONS_STR ||
       sbol->codigo == CIF || sbol->codigo == CWHILE ||
       sbol->codigo == CIN || sbol->codigo == COUT ||
-      sbol->codigo == CPYCOMA || sbol->codigo == CRETURN)
+      sbol->codigo == CPYCOMA || sbol->codigo == CRETURN){
 
-    lista_proposiciones(une(folset, cons(CLLA_CIE,NADA)));
 
-  if (sbol->codigo != CLLA_CIE){
-      error_handler(24);
-  }
-  //PONEMOS SCANNER AFUERA PARA QUE IMPRIMA BIEN LOS ERRORES!!!
+    lista_proposiciones(une(folset,cons(CLLA_CIE,NADA)));}
+     
+	if (sbol->codigo == CLLA_CIE) {
+    if (en_tabla_funcion != NIL && (ts[en_tabla_funcion].ets->ptr_tipo != en_tabla("void")) && (!isReturn))
+        error_handler(37);
+
+    scanner();
+    }else error_handler(24);
+
+     appendMAC(FINB, iToStr(get_nivel()));
+    pop_nivel();
+
+    test(folset, cons(NADA,NADA), 61);
+	
+
+
 }
 void lista_declaraciones(set folset) {
+  
+  declaracion(une(folset,firsts[D]));
+  
+  while (sbol->codigo == CVOID || sbol->codigo == CCHAR || 
+         sbol->codigo == CINT || sbol->codigo == CFLOAT) 
 
   declaracion(une(folset,firsts[D]));
 
-  while (sbol->codigo == CVOID || sbol->codigo == CCHAR ||
-         sbol->codigo == CINT || sbol->codigo == CFLOAT)
-
-    declaracion(une(folset,firsts[D]));
-
 }
 
-void declaracion(set folset){
+void declaracion(set folset){ 
 
-  especificador_tipo(une(une(folset, firsts[LDI]),cons(CPYCOMA,NADA)));
+  especificador_tipo(une(une(folset,firsts[LDI]),cons(CPYCOMA,NADA)));
 
-  lista_declaraciones_init(une(folset, cons(CPYCOMA,NADA)));
-  
-  inf_id->clase = CLASVAR;
-  insertarTS();
+  lista_declaraciones_init(une(folset,cons(CPYCOMA,NADA)));
 
-  if (sbol->codigo == CPYCOMA){
-      scanner();
-  }
+  if (sbol->codigo == CPYCOMA) scanner();
   else error_handler(22);
 
+
   test(folset,cons(NADA,NADA),62);
+	
 }
 
 void lista_proposiciones(set folset) {
@@ -1166,7 +1073,7 @@ void lista_proposiciones(set folset) {
   proposicion(une(folset,firsts[PRO]));
 
   while (sbol->codigo == CLLA_ABR || sbol->codigo == CMAS ||
-	 sbol->codigo == CMENOS || sbol->codigo == CIDENT ||
+	 sbol->codigo == CMENOS || sbol->codigo == CIDENT || 
 	 sbol->codigo == CPAR_ABR || sbol->codigo == CNEG ||
 	 sbol->codigo == CCONS_ENT || sbol->codigo == CCONS_FLO ||
 	 sbol->codigo == CCONS_CAR || sbol->codigo == CCONS_STR ||
@@ -1174,23 +1081,15 @@ void lista_proposiciones(set folset) {
 	 sbol->codigo == CIN || sbol->codigo == COUT ||
 	 sbol->codigo == CPYCOMA || sbol->codigo == CRETURN)
 
-    proposicion(une(folset,firsts[PRO]));
+         proposicion(une(folset,firsts[PRO]));
 
 }
 
 void proposicion(set folset){
+  
   test(firsts[PRO],folset,63);
   switch (sbol->codigo) {
-  case CLLA_ABR:
-      pushTB();
-      proposicion_compuesta(folset);
-      if (sbol->codigo == CLLA_CIE){
-        scanner();
-      }
-      popTB();
-      //por que sacamos el scanner de proposicion compuesta pongo el test aca
-      test(folset,cons(NADA,NADA),61);
-      break;
+  case CLLA_ABR: proposicion_compuesta(folset); break;
   case CWHILE: proposicion_iteracion(folset); break;
   case CIF: proposicion_seleccion(folset); break;
   case CIN:
@@ -1207,18 +1106,19 @@ void proposicion(set folset){
   case CPYCOMA:  proposicion_expresion(folset); break;
   case CRETURN:  proposicion_retorno(folset); break;
   default: error_handler(25);
-  }
+  
+ 
+ }
 }
 
 void proposicion_iteracion(set folset) {
-
   if (sbol->codigo == CWHILE) scanner();
   else error_handler(26);
 
   if (sbol->codigo == CPAR_ABR) scanner();
   else error_handler(19);
 
-  expresion(une(une(folset,cons(CPAR_CIE,NADA)),firsts[PRO]));
+  expresion(une(une(folset,firsts[PRO]),cons(CPAR_CIE,NADA)));
 
   if (sbol->codigo == CPAR_CIE) scanner();
   else error_handler(20);
@@ -1228,321 +1128,714 @@ void proposicion_iteracion(set folset) {
 }
 
 
-void proposicion_seleccion(set folset) {
-
+void proposicion_seleccion(set folset) { 
+  struct typeAux TipoEx;
+  int lineaBIFF, lineaBIFS, d1; 
   if (sbol->codigo == CIF) scanner();
   else error_handler(27);
-
   if (sbol->codigo == CPAR_ABR) scanner();
   else error_handler(19);
-
-  expresion(une(une(folset,cons(CPAR_CIE|CELSE,NADA)),firsts[PRO]));
-
+  TipoEx=expresion(une(une(folset,firsts[PRO]),cons(CPAR_CIE|CELSE,NADA)));
   if (sbol->codigo == CPAR_CIE) scanner();
   else error_handler(20);
-
-  proposicion(une(une(folset,cons(CELSE,NADA)),firsts[PRO]));
-
+  lineaBIFF= newLineMAC;  
+  proposicion(une(une(cons(CELSE,NADA),folset),firsts[PRO]));
+  d1 = calcularDespl(lineaBIFF, newLineMAC); 
   if (sbol->codigo == CELSE){
-    scanner();
+        lineaBIFS= newLineMAC; 
+        scanner();
+        proposicion(folset);
+        d1= calcularDespl(lineaBIFS, newLineMAC);
+      
+        appendKMAC(BIFS, iToStr(d1), lineaBIFS);
+        d1= calcularDespl(lineaBIFF, lineaBIFS + 1);
+   
+   }  
 
-    proposicion(folset);
-  }
-
+     appendKMAC(BIFF, concatString(iToStr(getTipo(TipoEx.tipo)), iToStr(d1)), lineaBIFF); 
 }
 
-void proposicion_e_s(set folset) {
+void proposicion_e_s(set folset) { 
+
+  struct typeAux TipoExp;
+  char t;
+
+  isINOUT= 1;
 
   switch(sbol->codigo) {
-  case CIN: { scanner();
+  case CIN: { 
+	    scanner(); 
             if (sbol->codigo == CSHR) scanner();
-            else error_handler(28);
-            variable(une(firsts[VAR], une(folset,cons(CPYCOMA|CSHR,NADA))));
+            	else error_handler(28);
+		TipoExp= variable(une(une(folset,cons(CSHR|CPYCOMA,NADA)),first(variabl)));
 
-             while (sbol->codigo == CSHR ) {
-                scanner();
-                variable(une(une(folset,cons(CSHR|CPYCOMA,NADA)),firsts[VAR]));
-               
-            }
+                        clearLMAC();
 
+                        t= getTipo(TipoExp.tipo);
+
+                        appendMAC(LEER, iToStr(getTipo(TipoExp.tipo)));
+                        appendMAC(ALM, concatString(concatString(iToStr(TipoExp.nivel),  iToStr(TipoExp.despl)), iToStr(t)));
+                        appendMAC(POP, iToStr(t));
+	       
+
+	    
+            while (sbol->codigo == CSHR || in(sbol->codigo,first(variabl))) {
+                  if (in(sbol->codigo, first(variabl))) error_handler(76);
+                            else scanner();
+
+                            TipoExp= variable(une(une(folset,cons(CSHR|CPYCOMA,NADA)),first(variabl)));
+
+                            clearLMAC();
+
+                            t= getTipo(TipoExp.tipo);
+
+                            appendMAC(LEER, iToStr(getTipo(TipoExp.tipo)));
+                            appendMAC(ALM, concatString(concatString(iToStr(TipoExp.nivel),  iToStr(TipoExp.despl)), iToStr(t)));
+                            appendMAC(POP, iToStr(t));
+                        }
+	    
 	    if (sbol->codigo == CPYCOMA) scanner();
 	    else error_handler(22);
 	    break;
   }
-  case COUT: {scanner();
+  case COUT: {
+	     scanner();
              if (sbol->codigo == CSHL) scanner();
-             else error_handler(29);
-             expresion(une(firsts[E], une(folset,cons(CPYCOMA|CSHL,NADA))));
+             	else error_handler(29);
+             
+             
+	     TipoExp= expresion(une(une(folset,cons(CSHL|CPYCOMA,NADA)),firsts[E]));
+	       if (TipoExp.typeExpresionresion == Const_iToStr)
+                            appendMAC(IMPCS,"");
+                        else
+                            appendMAC(IMPR, iToStr(getTipo(TipoExp.tipo)));
 
-             while (sbol->codigo == CSHL){
-                        scanner();
-               
-             expresion(une(une(folset,cons(CSHL|CPYCOMA,NADA)),firsts[E]));
-             }
+             while (sbol->codigo == CSHL || in(sbol->codigo,firsts[E])) {
+               if(in(sbol->codigo,firsts[E])){
+			error_handler(77);
+	       }else{
+               		scanner();
+	       }
+             TipoExp= expresion(une(une(folset,cons(CSHL|CPYCOMA,NADA)),firsts[E]));
+              if (TipoExp.typeExpresionresion == Const_iToStr)
+                                appendMAC(IMPCS, "");
+                            else
+                                appendMAC(IMPR, iToStr(getTipo(TipoExp.tipo)));              
+
+	     }
 	     if (sbol->codigo == CPYCOMA) scanner();
 	     else error_handler(22);
 	     break;
   }
-   default: error_handler(30);
-   }
-
-  test(folset, cons(NADA,NADA) ,64);
+   default: error_handler(30); 
+}
+test(folset,cons(NADA,NADA),64);
+isINOUT= 0;
 }
 
 
-void proposicion_retorno(set folset) {
-
+void proposicion_retorno(set folset) {	
   scanner();
   expresion(une(folset,cons(CPYCOMA,NADA)));
   if (sbol->codigo == CPYCOMA) scanner();
   else error_handler(22);
-  return_flag = 1;
-
-  test(folset, cons(NADA,NADA), 65);
+  isReturn= 1;
+  test(folset,cons(NADA,NADA),65);
 }
 
 
-void proposicion_expresion(set folset){
+void proposicion_expresion(set folset){  
+  sentencia= 1; 
+  control= -1;
 
   if (sbol->codigo == CMAS || sbol->codigo == CMENOS ||
-      sbol->codigo == CIDENT ||
+      sbol->codigo == CIDENT || 
       sbol->codigo == CPAR_ABR || sbol->codigo == CNEG ||
       sbol->codigo == CCONS_ENT || sbol->codigo == CCONS_FLO ||
       sbol->codigo == CCONS_CAR || sbol->codigo == CCONS_STR)
 
-    expresion(une(folset,cons(CPYCOMA,NADA)));
+  	expresion(une(folset,cons(CPYCOMA,NADA)));
 
   if (sbol->codigo == CPYCOMA) scanner();
-  else error_handler(22);
-
-  test(folset,cons(NADA,NADA), 66);
+  	else error_handler(22);
+  test(folset,cons(NADA,NADA),66);
+  sentencia= 0;
 }
 
+struct typeAux expresion(set folset) {  
+    struct typeAux Tipo_Retorno,TipoE;
+    char tvar,t;
+    int nLineaCast;
+    long int op;
 
-void expresion(set folset) {
+    control++;
 
-  expresion_simple(une(une(folset,firsts[E]),cons(CASIGNAC, CDISTINTO|CIGUAL|CMENOR|CMEIG|CMAYOR|CMAIG)));
+    Tipo_Retorno=   expresion_simple(une(une(folset,firsts[E]),cons(CASIGNAC, CDISTINTO|CIGUAL|CMENOR|CMEIG|CMAYOR|CMAIG)));
+    nLineaCast= newLineMAC;
+    
+    TipoE.tipo= en_tabla("char");
 
-  if(in(sbol->codigo,firsts[E])){
-      error_handler(78);
-      expresion(folset);
-  }else{
-
-  switch (sbol->codigo) {
-  case CASIGNAC:{
-               scanner();
-	       expresion(folset);
-	       break;
-  }
-  case CDISTINTO:
-  case CIGUAL:
-  case CMENOR:
-  case CMEIG:
-  case CMAYOR:
-  case CMAIG: {
-              scanner();
-              expresion(folset);
-	      break;
-  }
-  }
-  }
-}
-
-
-void expresion_simple(set folset) {
-
-  test(firsts[ES],une(une(folset,cons(NADA,CMAS|CMENOS|COR)),firsts[T]),67);
-
-  if (sbol->codigo == CMAS || sbol->codigo == CMENOS) scanner();
-
-  termino(une(une(folset,cons(NADA,CMAS|CMENOS|COR)),firsts[T]));
-
-  while (sbol->codigo == CMAS || sbol->codigo == CMENOS || sbol->codigo == COR)
-  {
-    if(in(sbol->codigo, firsts[T])){
+    if (in(sbol->codigo, firsts[E])){
         error_handler(78);
-    }else{
-        scanner();
-    }
-    termino(une(une(folset,cons(NADA,CMAS|CMENOS|COR)),firsts[T]));
-  }
+        TipoE= expresion(folset);
+    }else
+        switch (sbol->codigo) {
 
+            case CASIGNAC:
+                            scanner();
+                            if (Tipo_Retorno.typeExpresionresion != unaVariable)
+                                error_handler(84);
+
+                            clearLMAC(); 
+
+                            TipoE= expresion(folset);
+
+                            if (TipoE.tipo > Tipo_Retorno.tipo)
+                                error_handler(93);
+
+                            Tipo_Retorno.valor= TipoE.valor;
+
+                            tvar= getTipo(Tipo_Retorno.tipo);
+                            t= getTipo(TipoE.tipo);
+
+                            if (t != tvar)
+                                appendMAC(CAST,concatString( iToStr(t), iToStr(tvar)));
+
+                            appendMAC(ALM, concatString(concatString(iToStr(Tipo_Retorno.nivel),  iToStr(Tipo_Retorno.despl)), iToStr(tvar)));
+			    //
+		            appendMAC(POP, iToStr(tvar));
+                            appendMAC(CRVL, concatString(concatString(iToStr(Tipo_Retorno.nivel),  iToStr(Tipo_Retorno.despl)), iToStr(tvar)));  
+			    //	
+                            if (sentencia && control == 0) 
+                                appendMAC(POP, iToStr(tvar)); 
+
+                            break;
+            case CDISTINTO:
+            case CIGUAL:
+            case CMENOR:
+            case CMEIG:
+            case CMAYOR:
+            case CMAIG:
+                            op= sbol->codigo;
+
+                            scanner();
+                            TipoE= expresion(folset);
+
+                            t= getTipo(Tipo_Retorno.tipo);
+                            tvar= getTipo(TipoE.tipo);
+
+
+                            if (tvar < t)  
+                                appendMAC(CAST, concatString(iToStr(tvar), iToStr(t)));
+                            else   
+                                if (tvar > t){
+                                    appendKMAC(CAST, concatString(iToStr(t), iToStr(tvar)), nLineaCast);
+                                    t= tvar;
+                                }
+
+                            switch(op){
+                                case CDISTINTO:
+                                    appendMAC(CMNI, iToStr(t));
+                                    break;
+                                case CIGUAL:
+                                    appendMAC(CMIG, iToStr(t));
+                                    break;
+                                case CMENOR:
+                                    appendMAC(CMME, iToStr(t));
+                                    //appendMAC(CMMA, iToStr(t));
+                                    break;
+                                case CMEIG:
+                                    appendMAC(CMEI, iToStr(t));
+                                    break;
+                                case CMAYOR:
+                                    appendMAC(CMMA, iToStr(t));
+                                    //appendMAC(CMME, iToStr(t));
+                                    break;
+                                case CMAIG:
+                                    appendMAC(CMAI, iToStr(t));
+                            }
+                            break;
+        };
+
+    Tipo_Retorno.tipo= Cohersion(Tipo_Retorno.tipo,TipoE.tipo);
+    control--;
+    
+    return Tipo_Retorno;
 }
 
-void termino(set folset) {
 
-  factor(une(une(folset,cons(NADA,CMULT|CDIV|CAND)),firsts[F]));
 
-  while (sbol->codigo == CMULT || sbol->codigo == CDIV || sbol->codigo == CAND)
-  {
-    	if(in(sbol->codigo,firsts[F])){
-              error_handler(78);
+struct typeAux expresion_simple(set folset) {
+    struct typeAux TipoT, Tipo_Retorno;
+   int masMenos= 0;
+    long int op= CMAS;
+    char t, tvar;
+    int nLineaCast;
+    
+      test(first(expresion_simpl),une(une(firsts[T],cons(NADA,COR)),folset),67);
+
+    if (sbol->codigo == CMAS || sbol->codigo == CMENOS){
+        op= sbol->codigo;
+        scanner();
+        masMenos= 1;
+    }
+
+    Tipo_Retorno= termino(une(une(folset,cons(NADA,CMAS|CMENOS|COR)),firsts[T]));
+    nLineaCast= newLineMAC;
+
+
+    if (op == CMENOS){
+        Tipo_Retorno.valor = -Tipo_Retorno.valor;
+        appendMAC(INV, iToStr(getTipo(Tipo_Retorno.tipo)));
+    }
+    
+    if (Tipo_Retorno.typeExpresionresion == unaVariable && masMenos)
+        Tipo_Retorno.typeExpresionresion= variables;
+
+    while (sbol->codigo == CMAS || sbol->codigo == CMENOS || sbol->codigo == COR || in(sbol->codigo, firsts[T])){
+        op= sbol->codigo;
+
+        if (in(sbol->codigo, firsts[T])) error_handler(78);
+        else scanner();
+        TipoT= termino(une(une(folset,cons(NADA,CMAS|CMENOS|COR)),firsts[T]));
+        
+        t= getTipo(Tipo_Retorno.tipo);
+        tvar= getTipo(TipoT.tipo);
+
+
+        if (tvar < t)
+            appendMAC(CAST, concatString(iToStr(tvar), iToStr(t)));
+        else    
+            if (tvar > t){  
+                appendKMAC(CAST, concatString(iToStr(t), iToStr(tvar)), nLineaCast);
+                t= tvar;
+            }
+
+        
+        switch(op){
+            case CMAS:
+                appendMAC(SUM, iToStr(t));
+                break;
+            case CMENOS:
+                appendMAC(SUB, iToStr(t));
+                break;
+            case COR:
+                appendMAC(OR, iToStr(t));
+        }
+
+
+        Tipo_Retorno.tipo= Cohersion(Tipo_Retorno.tipo, TipoT.tipo);
+        Tipo_Retorno.typeExpresionresion= (Tipo_Retorno.typeExpresionresion == unaVariable ||
+                                     (TipoT.typeExpresionresion != Tipo_Retorno.typeExpresionresion))?
+                                     vars_consts : TipoT.typeExpresionresion;
+
+        if (Tipo_Retorno.typeExpresionresion == Constant && (Tipo_Retorno.tipo == en_tabla("int") || Tipo_Retorno.tipo == en_tabla("char"))){
+            switch(op){
+                case CMAS:
+                    Tipo_Retorno.valor+= TipoT.valor;
+                    break;
+                case CMENOS:
+                    Tipo_Retorno.valor-= TipoT.valor;
+                    break;
+                case COR:
+                    Tipo_Retorno.valor= Tipo_Retorno.valor || TipoT.valor;
+            }
+        }
+        nLineaCast= newLineMAC;
+    }
+
+    return Tipo_Retorno;
+}
+
+struct typeAux termino(set folset) { 
+    long int op;
+    struct typeAux Tipo_Retorno, TipoF;
+    char t, tvar;
+    int nLineaCast;
+
+    Tipo_Retorno= factor(une(une(folset,cons(NADA,CMULT|CDIV|CAND)),firsts[F]));
+     nLineaCast= newLineMAC;
+
+    if (Tipo_Retorno.typeExpresionresion == variables)
+        Tipo_Retorno.typeExpresionresion= unaVariable;	 
+
+  while ((sbol->codigo == CMULT || sbol->codigo == CDIV || sbol->codigo == CAND)|| in(sbol->codigo,firsts[F]))
+  { 
+	op= sbol->codigo;
+	if(in(sbol->codigo,firsts[F])){
+              error_handler(78);	
 	}else{
 	    scanner();
 	}
-    factor(une(une(folset,cons(NADA,CMULT|CDIV|CAND)),firsts[F]));
-  }
+	   TipoF= factor(une(une(folset,cons(NADA,CMULT|CDIV|CAND)),firsts[F]));
 
-}
+        t= getTipo(Tipo_Retorno.tipo);
+        tvar= getTipo(TipoF.tipo);
 
-void factor(set folset) {
+        if (tvar < t)  
+            appendMAC(CAST, concatString(iToStr(tvar), iToStr(t)));
+        else  
+            if (tvar > t){
+                appendKMAC(CAST, concatString(iToStr(t), iToStr(tvar)), nLineaCast);
+                t= tvar;
+            }
 
-  test(firsts[F],une(folset, une(firsts[E],cons(CPAR_CIE,NADA))),68);
 
-  switch (sbol->codigo){
-  case CIDENT:
-      if (en_tabla(sbol->lexema) == NIL){
-          error_handler(33);
-          strcpy(inf_id->nbre,sbol->lexema);
-          inf_id->ptr_tipo = en_tabla("TIPOERROR");
 
-      }
-
-      int function_pos = en_tabla(sbol->lexema);
-      if(function_pos != NIL){
-        entrada_TS function = * ts[function_pos].ets;
-        if(function.clase == CLASFUNC){
-            llamada_funcion(folset);
-            break;
+        switch(op){
+            case CMULT:
+                appendMAC(MUL, iToStr(t));
+                break;
+            case CDIV:
+                appendMAC(DIV, iToStr(t));
+                break;
+            case CAND:
+                appendMAC(AND, iToStr(t));
         }
-      }
-      variable(folset);
-      break;
-  case CCONS_ENT:
-  case CCONS_FLO:
-  case CCONS_CAR: constante(folset); break;
-  case CCONS_STR: scanner(); break;
-  case CPAR_ABR: {
-                 scanner();
-		 expresion(une(folset,cons(CPAR_CIE, NADA)));
-		 if (sbol->codigo == CPAR_CIE) scanner();
-		 else error_handler(20);
-		 break;
-  }
-  case CNEG: {
-              scanner();
-	      expresion(folset);
-	      break;
-  }
-  default: error_handler(31);
-  }
 
-  test(folset,cons(NADA,NADA),69);
+        Tipo_Retorno.tipo= Cohersion(Tipo_Retorno.tipo, TipoF.tipo);
+        Tipo_Retorno.typeExpresionresion= (TipoF.typeExpresionresion != Tipo_Retorno.typeExpresionresion)? vars_consts : TipoF.typeExpresionresion;
 
-}
-
-void variable(set folset){
-  test(firsts[VAR],folset,70);
-
-  char tipo_aux [TAM_ID] = "";
-  if (sbol->codigo == CIDENT){
-      strcpy(tipo_aux , sbol->lexema);
-      scanner();
-  }
-  else error_handler(16);
-
-  /* el alumno debera verificar con una consulta a TS
-    si, siendo la variable un arreglo, corresponde o no
-    verificar la presencia del subindice */
- if (sbol->codigo == CCOR_ABR){
-   if(inf_id->ptr_tipo == en_tabla("TIPOERROR")){
-       inf_id->ptr_tipo = en_tabla("TIPOARREGLO");
-       insertarTS();
-   }
-   if(strcmp(tipo_aux,"") != 0 && ts[en_tabla(tipo_aux)].ets->ptr_tipo != en_tabla("TIPOARREGLO")){
-       error_handler(32);
-   }
-   scanner();
-   expresion(une(folset,cons(CCOR_CIE,NADA)));
-   if (sbol->codigo == CCOR_CIE) scanner();
-   else error_handler(21);
- }else{
-     if(inf_id->ptr_tipo == en_tabla("TIPOERROR")){
-        insertarTS();
-    }
-     
-        if(en_tabla(tipo_aux) == NIL &&(sbol->codigo!=CCONS_ENT)){
-            error_handler(33);
-        }else if(strcmp(tipo_aux,"") != 0  && ts[en_tabla(tipo_aux)].ets->ptr_tipo == en_tabla("TIPOARREGLO")){
-            if(!function_call_flag){
-                error_handler(40);
+        if (Tipo_Retorno.typeExpresionresion == Constant && (Tipo_Retorno.tipo == en_tabla("int") || Tipo_Retorno.tipo == en_tabla("char"))){
+            switch(op){
+                case CMULT: Tipo_Retorno.valor*= TipoF.valor; break;
+                case CDIV: Tipo_Retorno.valor= (int)(Tipo_Retorno.valor / TipoF.valor); break;
+                case CAND: Tipo_Retorno.valor= Tipo_Retorno.valor && TipoF.valor;
             }
         }
-      
- }
-  test(folset,cons(NADA,NADA),71);
-}
-void llamada_funcion(set folset) {
+        nLineaCast= newLineMAC;
+    }
 
-  if (sbol->codigo == CIDENT) scanner();
-  else error_handler(16);
-
-  if (sbol->codigo == CPAR_ABR) scanner();
-  else error_handler(19);
-
-  function_call_flag = 1;
-
-  if (sbol->codigo == CMAS || sbol->codigo == CMENOS ||
-      sbol->codigo == CIDENT ||
-      sbol->codigo == CPAR_ABR || sbol->codigo == CNEG ||
-      sbol->codigo == CCONS_ENT || sbol->codigo == CCONS_FLO ||
-      sbol->codigo == CCONS_CAR || sbol->codigo == CCONS_STR)
-
-    lista_expresiones(une(folset,cons(CPAR_CIE,NADA)));
-
-   if (sbol->codigo == CPAR_CIE) scanner();
-  else error_handler(20);
-  function_call_flag = 0;
-
-  test(folset, cons(NADA,NADA),72);
+    return Tipo_Retorno;
+ 
 }
 
-void lista_expresiones(set folset) {
+struct typeAux factor(set folset) {
+    char lexema[TAM_LEXEMA], t;
+    struct typeAux Tipo_Retorno;
+    int i,j;
+    char* s1;	
 
-  expresion(une(firsts[E],une(folset,cons(CCOMA,NADA))));
+    test(firsts[F], folset, 68);
+    
+    switch (sbol->codigo){
+        case CIDENT:
+                        if (Clase_Ident(sbol->lexema) == NIL){	
 
-  while (sbol->codigo == CCOMA){
+                            strcpy(lexema, sbol->lexema);
 
-                scanner();      
+                            scanner();
 
-  expresion(une(une(folset,cons(CCOMA,NADA)),firsts[E]));
- }
-  
+                            error_handler(33);
+
+                            if (sbol->codigo == CPAR_ABR){
+
+                                strcpy(inf_id->nbre, lexema);
+                                inf_id->clase = CLASFUNC;
+                                inf_id->ptr_tipo = en_tabla("TIPOERROR");
+
+                                scanner();
+
+                                if (sbol->codigo == CMAS      || sbol->codigo == CMENOS    ||
+                                    sbol->codigo == CIDENT    || sbol->codigo == CPAR_ABR  ||
+                                    sbol->codigo == CNEG      || sbol->codigo == CCONS_ENT ||
+                                    sbol->codigo == CCONS_FLO || sbol->codigo == CCONS_CAR ||
+                                    sbol->codigo == CCONS_STR)
+                                                lista_expresiones(une(folset, cons(CPAR_CIE, NADA)));
+
+                                if (sbol->codigo == CPAR_CIE) scanner();
+                                else error_handler(20);
+
+                            }else{
+                                strcpy(inf_id->nbre, lexema);
+                                inf_id->clase = CLASVAR;
+                                inf_id->ptr_tipo = en_tabla("TIPOERROR");
+
+
+                                if (sbol->codigo == CCOR_ABR){	
+
+                                        inf_id->desc.part_var.arr.ptero_tipo_base= inf_id->ptr_tipo;
+                                        inf_id->ptr_tipo = en_tabla("TIPOARREGLO");
+
+                                        scanner();
+                                        expresion(une(folset, cons(CCOR_CIE, NADA)));
+
+                                        if (sbol->codigo == CCOR_CIE) scanner();
+                                        else error_handler(21);
+                                }
+
+                            }
+                            insertarTS();
+
+                        }else
+                            if (Clase_Ident(sbol->lexema) == CLASFUNC)
+                                Tipo_Retorno= llamada_funcion(folset);
+                            else
+                                Tipo_Retorno= variable(folset);
+
+                        break;
+        case CCONS_ENT:
+        case CCONS_FLO:
+        case CCONS_CAR:                         
+                        Tipo_Retorno= constante(folset);
+                        t= getTipo(Tipo_Retorno.tipo);
+                        if (t == 2)
+                            appendMAC(CRCT, concatString(iToStr(t),  Tipo_Retorno.sValor));
+                        else
+                            appendMAC(CRCT, concatString(iToStr(t), Tipo_Retorno.sValor));
+                        break;
+        case CCONS_STR: 
+                        if (!isINOUT)
+                            error_handler(86);
+
+                        appendMAC(CRCTS, iToStr(dameCS())); 
+
+                        strmplN(sbol->lexema);
+                        strmplT(sbol->lexema);
+                         
+                        pushCS(sbol->lexema);
+
+                        Tipo_Retorno.typeExpresionresion= Const_iToStr;
+                        strcpy(Tipo_Retorno.sValor, sbol->lexema);
+                        scanner();
+                        break;
+        case CPAR_ABR:
+                        scanner();
+                        Tipo_Retorno= expresion(une(folset, cons(CPAR_CIE, NADA)));
+
+                        if (sbol->codigo == CPAR_CIE) scanner();
+                        else error_handler(20);
+
+                        break;
+        case CNEG:
+                        scanner();
+                        Tipo_Retorno= expresion(folset);
+                        t= getTipo(Tipo_Retorno.tipo);
+                        
+                        appendMAC(NEG, iToStr(t));
+                        break;
+        default: 
+                        error_handler(31);
+                        Tipo_Retorno.tipo= en_tabla("TIPOERROR");
+    }
+
+    test(folset, cons(NADA,NADA), 69);
+
+    return Tipo_Retorno;
 }
 
-void constante(set folset){
-  test(firsts[CON],folset,73);
 
-  switch (sbol->codigo) {
-  case CCONS_ENT: scanner(); break;
-  case CCONS_FLO: scanner(); break;
-  case CCONS_CAR: scanner(); break;
-  default: error_handler(38); //scanner(); /*f_error(); aca va f_error, faltan los algoritmos de conversion a las constantes numericas. */
-  }
+struct typeAux variable(set folset){   
+char lexema[TAM_LEXEMA], t;
+int Iden_No_Declarado= 0;
+struct typeAux TipoE, Tipo_Retorno;
 
-}
 
-void test(set cjto1, set cjto2, int n){
-    if (in(sbol->codigo, cjto1) == 0){
-        error_handler(n);
-        cjto1 = une(cjto1,cjto2);
-        while (!in(sbol->codigo, cjto1)) // ahora cjto1 es el conjunto de
-        {
-             scanner();
+    test(first(variabl), folset, 70);
+
+    if (sbol->codigo == CIDENT){
+
+        strcpy(lexema, sbol->lexema);
+
+        Iden_No_Declarado= (Clase_Ident(sbol->lexema) == NIL)? 1 : 0;
+
+        scanner();
+
+        if (Iden_No_Declarado){	
+
+            error_handler(33);
+
+            if (sbol->codigo == CPAR_ABR){ 
+
+                strcpy(inf_id->nbre, lexema);
+                inf_id->clase = CLASFUNC;
+                inf_id->ptr_tipo = en_tabla("TIPOERROR");
+
+                scanner();
+
+                if (sbol->codigo == CMAS 	  || sbol->codigo == CMENOS    ||
+                        sbol->codigo == CIDENT    || sbol->codigo == CPAR_ABR  ||
+                        sbol->codigo == CNEG      || sbol->codigo == CCONS_ENT ||
+                        sbol->codigo == CCONS_FLO || sbol->codigo == CCONS_CAR ||
+                        sbol->codigo == CCONS_STR)
+                                lista_expresiones(une(folset, cons(CPAR_CIE, NADA)));
+
+                if (sbol->codigo == CPAR_CIE) scanner();
+                else error_handler(20);
+
+            }else{
+                strcpy(inf_id->nbre, lexema);
+                inf_id->clase = CLASVAR;
+                inf_id->ptr_tipo = en_tabla("TIPOERROR");
+
+
+                if (sbol->codigo == CCOR_ABR){	
+
+                        inf_id->desc.part_var.arr.ptero_tipo_base= inf_id->ptr_tipo;
+                        inf_id->ptr_tipo = en_tabla("TIPOARREGLO");
+                        inf_id->desc.part_var.arr.cant_elem= 99999; //inicializo con un nro grande
+
+                        scanner();
+                        expresion(une(folset, cons(CCOR_CIE, NADA)));
+
+                        if (sbol->codigo == CCOR_CIE) scanner();
+                        else error_handler(21);
+                }
+
+            }
+
+            insertarTS();
+
+        }else{  
+            if (sbol->codigo == CCOR_ABR){
+                scanner();
+                TipoE= expresion(une(folset, cons(CCOR_CIE, NADA)));
+
+                if (TipoE.typeExpresionresion == Constant){
+                    if (TipoE.tipo == en_tabla("float") || TipoE.valor < 0)
+                        error_handler(85);
+                    else
+                    if (TipoE.valor >= ts[en_tabla(lexema)].ets->desc.part_var.arr.cant_elem)
+                        error_handler(85);
+                }
+                
+                if (sbol->codigo == CCOR_CIE) scanner();
+                else error_handler(21);
+
+
+                if (Tipo_Ident(lexema) != en_tabla("TIPOARREGLO"))
+                    error_handler(32);
+                else{
+                    Tipo_Retorno.tipo= ts[en_tabla(lexema)].ets->desc.part_var.arr.ptero_tipo_base;
+		    //printf("retorno de base arreglo: %d\n",Tipo_Retorno.tipo);
+                    //printf("lexema arreglo: %s\n",lexema); 	
+                  }
+            }else  
+                if (Tipo_Ident(lexema) == en_tabla("TIPOARREGLO")&&!isLlamadafuncion)	
+                        error_handler(43);
+                else{                    
+
+                    Tipo_Retorno.tipo= Tipo_Ident(lexema);
+         
+                    t= getTipo(Tipo_Retorno.tipo);
+			
+                    appendMAC(CRVL, concatString(concatString(iToStr(ts[en_tabla(lexema)].ets->desc.nivel), iToStr(ts[en_tabla(lexema)].ets->desc.despl)), iToStr(t)));
+
+                    if (Tipo_Retorno.tipo == en_tabla("TIPOARREGLO"))
+                        Tipo_Retorno.tipo_base= ts[en_tabla(lexema)].ets->desc.part_var.arr.ptero_tipo_base;
+                }
         }
+
+        Tipo_Retorno.typeExpresionresion= variables;
+        Tipo_Retorno.despl= ts[en_tabla(lexema)].ets->desc.despl;
+        Tipo_Retorno.nivel= ts[en_tabla(lexema)].ets->desc.nivel;
+    }else
+        error_handler(16);
+
+    test(folset, cons(NADA,NADA), 71);
+
+    return Tipo_Retorno;
+}
+
+
+struct typeAux llamada_funcion(set folset) {
+    char lexema[TAM_LEXEMA];
+    struct typeAux Tipo_Retorno;
+    isLlamadafuncion= 1;
+    
+    en_tabla_funcion_Llama= en_tabla(sbol->lexema);
+    
+    if (sbol->codigo == CIDENT){
+        strcpy(lexema, sbol->lexema);
+        scanner();
+    }else error_handler(16);
+
+    if (sbol->codigo == CPAR_ABR) scanner();
+    else error_handler(19);
+
+    cantParametros= 0; 
+
+    if (sbol->codigo == CMAS 	  || sbol->codigo == CMENOS    ||
+        sbol->codigo == CIDENT    || sbol->codigo == CPAR_ABR  ||
+        sbol->codigo == CNEG      || sbol->codigo == CCONS_ENT ||
+        sbol->codigo == CCONS_FLO || sbol->codigo == CCONS_CAR ||
+        sbol->codigo == CCONS_STR)
+            lista_expresiones(une(folset, cons(CPAR_CIE, NADA)));
+
+    if (cantParametros != ts[en_tabla(lexema)].ets->desc.part_var.sub.cant_par)
+        error_handler(88);
+
+    if (sbol->codigo == CPAR_CIE) scanner();
+    else error_handler(20);
+
+    isLlamadafuncion= 0;
+
+    test(folset, cons(NADA,NADA), 72);
+
+    Tipo_Retorno.tipo= Tipo_Ident(lexema);
+    Tipo_Retorno.typeExpresionresion= funcion;
+
+    return Tipo_Retorno;
+}
+
+
+void lista_expresiones(set folset){
+    struct typeAux TipoE;
+    cantParametros= 0;
+    
+    TipoE= expresion(une(une(folset,cons(CCOMA,NADA)),firsts[E])); 
+    cantParametros++;
+
+    chequeoParam(TipoE, cantParametros);
+
+    while (sbol->codigo == CCOMA || in(sbol->codigo, firsts[E])){
+        if (in(sbol->codigo, firsts[E])) error_handler(75);
+        else scanner();
+
+      TipoE= expresion(une(une(folset,cons(CCOMA,NADA)),firsts[E]));
+        cantParametros++;
+
+       chequeoParam(TipoE, cantParametros);
     }
 }
 
+struct typeAux constante(set folset){   
+  struct typeAux Tipo_Retorno;
 
+  Tipo_Retorno.typeExpresionresion= Constant;  
 
+  test(firsts[CON],folset,73);	
+  switch (sbol->codigo) {
+            case CCONS_ENT:
 
+                            Tipo_Retorno.valor= atoi(sbol->lexema);
+                            strcpy(Tipo_Retorno.sValor, sbol->lexema);
 
+                            cantConstantess++;
+                            scanner();
+                            Tipo_Retorno.tipo= en_tabla("int");
+                            break;
+            case CCONS_FLO:
+                            Tipo_Retorno.valor= charToFloat(sbol->lexema);
+                            strcpy(Tipo_Retorno.sValor, sbol->lexema);
 
+                            cantConstantess++;
+                            scanner();
+                            Tipo_Retorno.tipo= en_tabla("float");
+                            break;
+            case CCONS_CAR:
+                            Tipo_Retorno.valor= sbol->lexema[1];
+                            strcpy(Tipo_Retorno.sValor, iToStr(Tipo_Retorno.valor));
 
+                            cantConstantess++;
+                            scanner();
+                            Tipo_Retorno.tipo= en_tabla("char");
+                            break;
+  default: error_handler(38);
 
+  }
+  test(folset,cons(NADA,NADA),74);
+  return Tipo_Retorno;	
 
-
-
-
-
+}
 
