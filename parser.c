@@ -133,18 +133,6 @@ int toInt(char t[]) {
     return (t[0] == '-') ? -res : res;
 }
 
-char *deReversa(char cadena[]) {
-    int i;
-    char temp;
-
-    for (i = 0; i < strlen(cadena) / 2; i++) {
-        temp = cadena[i];
-        cadena[i] = cadena[strlen(cadena) - 1 - i];
-        cadena[strlen(cadena) - 1 - i] = temp;
-    }
-    return cadena;
-}
-
 char *concatString(char s1[], char s2[]) {
     newLine = (char *) calloc(1, 50);
     strcat(newLine, s1);
@@ -200,7 +188,14 @@ char *iToStr(int num) {
             num /= 10;
         }
         salida[i] = 0;
-        return deReversa(salida);
+
+        int i; char temp;
+        for (i = 0; i < strlen(salida) / 2; i++) {
+            temp = salida[i];
+            salida[i] = salida[strlen(salida) - 1 - i];
+            salida[strlen(salida) - 1 - i] = temp;
+        }
+        return salida;
     } else {
         return unionST("-", iToStr(-num));
     }
