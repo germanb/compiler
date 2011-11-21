@@ -218,29 +218,6 @@ float charToFloat(char num[]) {
     return (num[0] == '-') ? -res : res;
 }
 
-void clearLMAC() {
-    codigo[newLineMAC - 1] = NULL;
-    codigoMostrar[--newLineMAC] = NULL;
-}
-
-int calcularDespl(int LineaO, int LineaSalto) {
-    int i, despl = 0;
-    if (LineaO <= LineaSalto) {
-        for (i = LineaO; i < LineaSalto; i++) {
-            char *Inst = codigo[i];
-            int x, tam = 0;
-            for (x = 0; x < strlen(Inst); x++)
-                if (Inst[x] == ' ' && Inst[x + 1] != 0) {
-                    tam++;
-                }
-            despl += tam + 1;
-        }
-        return despl;
-    } else {
-        return -(calcularDespl(LineaSalto, LineaO) + 2 + 3);
-    }
-}
-
 char Cohersion(char tipo, char Tipo_Operado) {
     char Tipo_Retorno = en_tabla("float");
 
@@ -268,10 +245,8 @@ char getTipo(char tipo) {
     if (tipo == en_tabla("char")) {
         return 0;
     } else if (tipo == en_tabla("int")) {
-
         return 1;
     } else {
-
         return 2;
     }
 }
@@ -394,7 +369,7 @@ char *obtenerInst(int INST) {
     return sINST;
 }
 
-void compilacion() {
+void compilation() {
 
     sbol=&token1 ;
 
@@ -445,7 +420,7 @@ void compilacion() {
     }
 }
 
-void ejecucion() {
+void ejecution() {
 
     float cod;
     FILE *PObj;
@@ -507,18 +482,10 @@ int main( int argc,char *argv[]) {
     }
     initFirsts();
     if (argv[1][1] == 'c') {
-        compilacion();
+        compilation();
     } else if (argv[1][1] == 'e') {
-        ejecucion();
+        ejecution();
     }
-}
-
-int chartoInt(char str[]) {
-    int num;
-
-    num = atoi(str);
-
-    return num;
 }
 
 /********* funciones del parser ***********/
@@ -1065,19 +1032,37 @@ void proposicion_seleccion(set folset) {
     }
     lineaBIFF = newLineMAC;
     proposicion(une(une(cons(CELSE, NADA), folset), firsts[PRO]));
-    d1 = calcularDespl(lineaBIFF, newLineMAC);
+    d1 = desp(lineaBIFF, newLineMAC);
     if (sbol->codigo == CELSE) {
         lineaBIFS = newLineMAC;
         scanner();
         proposicion(folset);
-        d1 = calcularDespl(lineaBIFS, newLineMAC);
+        d1 = desp(lineaBIFS, newLineMAC);
 
         appendKMAC(BIFS, iToStr(d1), lineaBIFS);
-        d1 = calcularDespl(lineaBIFF, lineaBIFS + 1);
+        d1 = desp(lineaBIFF, lineaBIFS + 1);
 
     }
 
     appendKMAC(BIFF, concatString(iToStr(getTipo(TipoEx.tipo)), iToStr(d1)), lineaBIFF);
+}
+
+int desp(int LineaO, int LineaSalto) {
+    int i, despl = 0;
+    if (LineaO <= LineaSalto) {
+        for (i = LineaO; i < LineaSalto; i++) {
+            char *Inst = codigo[i];
+            int x, tam = 0;
+            for (x = 0; x < strlen(Inst); x++)
+                if (Inst[x] == ' ' && Inst[x + 1] != 0) {
+                    tam++;
+                }
+            despl += tam + 1;
+        }
+        return despl;
+    } else {
+        return -(desp(LineaSalto, LineaO) + 2 + 3);
+    }
 }
 
 void proposicion_iteracion(set folset) {
@@ -1122,7 +1107,8 @@ void proposicion_e_s(set folset) {
         }
         TipoExp = variable(une(une(folset, cons(CSHR | CPYCOMA, NADA)), firsts[VAR]));
 
-        clearLMAC();
+        codigo[newLineMAC - 1] = NULL;
+        codigoMostrar[--newLineMAC] = NULL;
 
         t = getTipo(TipoExp.tipo);
 
@@ -1141,7 +1127,8 @@ void proposicion_e_s(set folset) {
 
             TipoExp = variable(une(une(folset, cons(CSHR | CPYCOMA, NADA)), firsts[VAR]));
 
-            clearLMAC();
+            codigo[newLineMAC - 1] = NULL;
+            codigoMostrar[--newLineMAC] = NULL;
 
             t = getTipo(TipoExp.tipo);
 
@@ -1238,7 +1225,8 @@ struct typeAux expresion(set folset) {
                 error_handler(84);
             }
 
-            clearLMAC();
+            codigo[newLineMAC - 1] = NULL;
+            codigoMostrar[--newLineMAC] = NULL;
 
             TipoE= expresion(folset);
 
