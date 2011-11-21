@@ -186,23 +186,6 @@ void appendKMAC(int INST, char linea[], int kLinea) {
     newLineMAC++;
 }
 
-void appendParam(tipo_inf_res *info_param) {
-    tipo_inf_res *cur;
-
-    cur = ts[en_tabla_funcion].ets->desc.part_var.sub.ptr_inf_res;
-
-    if (cur == NULL) {
-        ts[en_tabla_funcion].ets->desc.part_var.sub.ptr_inf_res = info_param;
-    } else {
-        while (cur->ptr_sig != NULL) {
-            cur = cur->ptr_sig;
-        }
-
-        cur->ptr_sig = info_param;
-    }
-
-}
-
 void chequeoParam(struct typeAux parametroReal, int numParametro) {
     tipo_inf_res parametroFormal;
 
@@ -766,7 +749,18 @@ void declaracion_parametro(set folset) {
     info_res_param->tipo_pje = inf_id->desc.part_var.tipo_pje;
     info_res_param->ptero_tipo_base = inf_id->desc.part_var.arr.ptero_tipo_base;
     info_res_param->ptr_sig = NULL;
-    appendParam(info_res_param);
+
+    tipo_inf_res *cur;
+    cur = ts[en_tabla_funcion].ets->desc.part_var.sub.ptr_inf_res;
+    if (cur == NULL) {
+        ts[en_tabla_funcion].ets->desc.part_var.sub.ptr_inf_res = info_res_param;
+    } else {
+        while (cur->ptr_sig != NULL) {
+            cur = cur->ptr_sig;
+        }
+        cur->ptr_sig = info_res_param;
+    }
+
     insertarTS();
     test(folset, cons(NADA, NADA), 55);
 }
