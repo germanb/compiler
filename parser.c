@@ -298,7 +298,7 @@ void clearKLMAC(int kLinea) {
     newLineMAC--;
 }
 
-void generarSalida() {
+/*void generarSalida() {
     FILE *PObj;
     int j;
     if ((PObj = fopen(strcat(archivo, ".o"), "w")) != NULL) {
@@ -318,7 +318,7 @@ void generarSalida() {
         fprintf(PObj, "$ ");
     }
     fclose(PObj);
-}
+}*/
 
 int tam_Instr(char *Inst) {
     int i, tam = 0;
@@ -523,7 +523,25 @@ void compilacion() {
     appendMAC(PARAR,"");
     if (error == 0) {
 
-        generarSalida();
+        FILE *PObj;
+        int j;
+        if ((PObj = fopen(strcat(archivo, ".o"), "w")) != NULL) {
+            int i;
+
+            fprintf(PObj, "$ ");
+            for (i = 0; i < newLineMAC; i++) {
+                fprintf(PObj, "%s\n", codigo[i]);
+            }
+
+            fprintf(PObj, "$ ");
+
+            for (i = 0, j = 0; i < dameCS(); i++) {
+
+                fprintf(PObj, "%d\n", dameC(i));
+            }
+            fprintf(PObj, "$ ");
+        }
+        fclose(PObj);
     }
 }
 
