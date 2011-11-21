@@ -11,3 +11,5 @@ EXTERNA char * linea;
 EXTERNA char *liberar;
 EXTERNA int nro_linea;
 EXTERNA token token1;
+
+char *newLine;
