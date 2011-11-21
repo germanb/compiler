@@ -186,51 +186,6 @@ void appendKMAC(int INST, char linea[], int kLinea) {
     newLineMAC++;
 }
 
-void chequeoParam(struct typeAux parametroReal, int numParametro) {
-    tipo_inf_res parametroFormal;
-
-    if (numParametro <= ts[en_tabla_funcion_Llama].ets->desc.part_var.sub.cant_par) {
-
-        tipo_inf_res *cur, salida;
-        cur = ts[en_tabla_funcion_Llama].ets->desc.part_var.sub.ptr_inf_res;
-        int i;
-        for (i = 1; i <= numParametro && cur != NULL; i++) {
-            salida = *cur;
-            cur = cur->ptr_sig;
-        }
-        parametroFormal = salida;
-
-        if (parametroFormal.ptero_tipo == en_tabla("TIPOARREGLO")) {
-
-            if (parametroReal.typeExpresionresion != unaVariable) {
-                error_handler(91);
-            } else if (parametroReal.tipo != en_tabla("TIPOARREGLO") || (parametroReal.tipo_base != parametroFormal.ptero_tipo_base)) {
-
-                error_handler(90);
-            }
-        } else {
-
-            if (parametroReal.tipo == en_tabla("TIPOARREGLO")) {
-                error_handler(90);
-            } else if (parametroFormal.tipo_pje == 'r' && parametroReal.typeExpresionresion != unaVariable) {
-                error_handler(92);
-            }
-
-            if (parametroFormal.ptero_tipo == en_tabla("float") && (parametroReal.tipo == en_tabla("float") || parametroReal.tipo == en_tabla("char") || parametroReal.tipo == en_tabla("int"))) {
-                return;
-            } else
-
-                if (parametroFormal.ptero_tipo == en_tabla("int") && (parametroReal.tipo == en_tabla("char") || parametroReal.tipo == en_tabla("int"))) {
-                    return;
-                } else if (parametroFormal.ptero_tipo == en_tabla("char") && parametroReal.tipo == en_tabla("char")) {
-                    return;
-                } else {
-                    error_handler(90);
-                }
-        }
-    }
-}
-
 float charToFloat(char num[]) {
     char part_ent[strlen(num) + 1], part_dec[strlen(num) + 1];
     int punto = 0;
@@ -1841,7 +1796,7 @@ void lista_expresiones(set folset) {
     TipoE= expresion(une(une(folset,cons(CCOMA,NADA)),firsts[E]));
     cantParametros++;
 
-    chequeoParam(TipoE, cantParametros);
+    check(TipoE, cantParametros);
 
     while (sbol->codigo == CCOMA || in(sbol->codigo, firsts[E])) {
         if (in(sbol->codigo, firsts[E])) {
@@ -1853,7 +1808,52 @@ void lista_expresiones(set folset) {
         TipoE= expresion(une(une(folset,cons(CCOMA,NADA)),firsts[E]));
         cantParametros++;
 
-        chequeoParam(TipoE, cantParametros);
+        check(TipoE, cantParametros);
+    }
+}
+
+void check(struct typeAux parametroReal, int numParametro) {
+    tipo_inf_res parametroFormal;
+
+    if (numParametro <= ts[en_tabla_funcion_Llama].ets->desc.part_var.sub.cant_par) {
+
+        tipo_inf_res *cur, salida;
+        cur = ts[en_tabla_funcion_Llama].ets->desc.part_var.sub.ptr_inf_res;
+        int i;
+        for (i = 1; i <= numParametro && cur != NULL; i++) {
+            salida = *cur;
+            cur = cur->ptr_sig;
+        }
+        parametroFormal = salida;
+
+        if (parametroFormal.ptero_tipo == en_tabla("TIPOARREGLO")) {
+
+            if (parametroReal.typeExpresionresion != unaVariable) {
+                error_handler(91);
+            } else if (parametroReal.tipo != en_tabla("TIPOARREGLO") || (parametroReal.tipo_base != parametroFormal.ptero_tipo_base)) {
+
+                error_handler(90);
+            }
+        } else {
+
+            if (parametroReal.tipo == en_tabla("TIPOARREGLO")) {
+                error_handler(90);
+            } else if (parametroFormal.tipo_pje == 'r' && parametroReal.typeExpresionresion != unaVariable) {
+                error_handler(92);
+            }
+
+            if (parametroFormal.ptero_tipo == en_tabla("float") && (parametroReal.tipo == en_tabla("float") || parametroReal.tipo == en_tabla("char") || parametroReal.tipo == en_tabla("int"))) {
+                return;
+            } else
+
+                if (parametroFormal.ptero_tipo == en_tabla("int") && (parametroReal.tipo == en_tabla("char") || parametroReal.tipo == en_tabla("int"))) {
+                    return;
+                } else if (parametroFormal.ptero_tipo == en_tabla("char") && parametroReal.tipo == en_tabla("char")) {
+                    return;
+                } else {
+                    error_handler(90);
+                }
+        }
     }
 }
 
