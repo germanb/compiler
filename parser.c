@@ -122,18 +122,15 @@ int toInt(char t[]) {
     if (t[0] == '-') {
         piso = 1;
     }
+
     for (; Ti >= piso; Ti--) {
-        res += (t[Ti] - 48) * elev(10, strlen(t)-(Ti + 1));
+        int x = 10, y = strlen(t)-(Ti + 1), r = 1;
+        for (; y > 0; y--) {
+            r *= x;
+        }
+        res += (t[Ti] - 48) * r;
     }
     return (t[0] == '-') ? -res : res;
-}
-
-int elev(int x, int y) {
-    int Rstado = 1;
-    for (; y > 0; y--) {
-        Rstado *= x;
-    }
-    return Rstado;
 }
 
 char *deReversa(char cadena[]) {
@@ -318,8 +315,11 @@ float charToFloat(char num[]) {
             part_dec[i - piso - (strlen(part_ent) + 1)] = num[i];
         }
     }
-    decimales = strlen(part_dec);
-    res = (toInt(strcat(part_ent, part_dec)) + .0) / elev(10, decimales);
+    int x = 10, y = strlen(part_dec), r = 1;
+    for (; y > 0; y--) {
+        r *= x;
+    }
+    res = (toInt(strcat(part_ent, part_dec)) + .0) / r;
 
     return (num[0] == '-') ? -res : res;
 }
@@ -871,7 +871,7 @@ void declarador_init(set folset) {
             if (sbol->codigo == CCONS_ENT) {
                 constEntera = toInt(sbol->lexema);
                 if (constEntera <= 0) {
-                    error_handler(80);
+                    error_handler(81);
                 }
                 scanner();
             } else {

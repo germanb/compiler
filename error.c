@@ -54,7 +54,7 @@ void error_print (int ne) {
   case 39: printf("\t Error %d: El identificador debe ser una variable o par�metro\n", ne); break;
   case 40: printf("\t Error %d: En una expresion, los arreglos deben ser accedidos por sus elementos\n", ne); break;
   case 41: printf("\t Error %d: No hoy mas memoria....\n", ne); break;
-   case 43: printf("\t Error %d: La variable es de tipo Arreglo, se esperan conchetes\n", ne); break;
+   case 43: printf("\t Error %d: La variable es de tipo Arreglo, se esperan corchetes\n", ne); break;
 
 
     /* errores de recuperacion de errores */
@@ -88,8 +88,8 @@ void error_print (int ne) {
   case 77: printf("\t Error %d: Falta << \n", ne); break;
   case 78: printf("\t Error %d: Falta *, /, &&, +, -, ||, = u operador de relaci�n \n", ne); break;
   case 79: printf("\t Error %d: Falta = \n", ne); break;
-  case 80: printf("\t Error %d:  \n", ne); break;
-  case 81: printf("\t Error %d: Un debe tener mas de un elemento \n", ne); break;
+
+  case 81: printf("\t Error %d: Un arreglo debe tener mas de un elemento \n", ne); break;
   case 82: printf("\t Error %d: Imposible asignar tipo void \n", ne); break;
   case 83: printf("\t Error %d: La cardinalidad del arreglo debe ser entera \n", ne); break;
   case 84: printf("\t Error %d: Se esperaba variable del lado izquierdo \n", ne); break;
