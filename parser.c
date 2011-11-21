@@ -203,25 +203,19 @@ void appendParam(tipo_inf_res *info_param) {
 
 }
 
-tipo_inf_res getParam(int k) {
-    int i;
-    tipo_inf_res *cur, salida;
-
-    cur = ts[en_tabla_funcion_Llama].ets->desc.part_var.sub.ptr_inf_res;
-
-    for (i = 1; i <= k && cur != NULL; i++) {
-        salida = *cur;
-        cur = cur->ptr_sig;
-    }
-    return salida;
-}
-
 void chequeoParam(struct typeAux parametroReal, int numParametro) {
     tipo_inf_res parametroFormal;
 
     if (numParametro <= ts[en_tabla_funcion_Llama].ets->desc.part_var.sub.cant_par) {
 
-        parametroFormal = getParam(numParametro);
+        tipo_inf_res *cur, salida;
+        cur = ts[en_tabla_funcion_Llama].ets->desc.part_var.sub.ptr_inf_res;
+        int i;
+        for (i = 1; i <= numParametro && cur != NULL; i++) {
+            salida = *cur;
+            cur = cur->ptr_sig;
+        }
+        parametroFormal = salida;
 
         if (parametroFormal.ptero_tipo == en_tabla("TIPOARREGLO")) {
 
