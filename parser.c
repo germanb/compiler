@@ -285,55 +285,17 @@ void clearLMAC() {
     codigoMostrar[--newLineMAC] = NULL;
 }
 
-void clearKLMAC(int kLinea) {
-    int i;
-
-    codigo[kLinea] = NULL;
-    codigoMostrar[kLinea] = NULL;
-
-    for (i = kLinea; i < newLineMAC - 1; i++) {
-        codigo[i] = codigo[i + 1];
-        codigoMostrar[i] = codigoMostrar[i + 1];
-    }
-    newLineMAC--;
-}
-
-/*void generarSalida() {
-    FILE *PObj;
-    int j;
-    if ((PObj = fopen(strcat(archivo, ".o"), "w")) != NULL) {
-        int i;
-
-        fprintf(PObj, "$ ");
-        for (i = 0; i < newLineMAC; i++) {
-            fprintf(PObj, "%s\n", codigo[i]);
-        }
-
-        fprintf(PObj, "$ ");
-
-        for (i = 0, j = 0; i < dameCS(); i++) {
-
-            fprintf(PObj, "%d\n", dameC(i));
-        }
-        fprintf(PObj, "$ ");
-    }
-    fclose(PObj);
-}*/
-
-int tam_Instr(char *Inst) {
-    int i, tam = 0;
-    for (i = 0; i < strlen(Inst); i++)
-        if (Inst[i] == ' ' && Inst[i + 1] != 0) {
-            tam++;
-        }
-    return tam + 1;
-}
-
 int calcularDespl(int LineaO, int LineaSalto) {
     int i, despl = 0;
     if (LineaO <= LineaSalto) {
         for (i = LineaO; i < LineaSalto; i++) {
-            despl += tam_Instr(codigo[i]);
+            char *Inst = codigo[i];
+            int x, tam = 0;
+            for (x = 0; x < strlen(Inst); x++)
+                if (Inst[x] == ' ' && Inst[x + 1] != 0) {
+                    tam++;
+                }
+            despl += tam + 1;
         }
         return despl;
     } else {
