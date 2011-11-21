@@ -140,35 +140,6 @@ char *concatString(char s1[], char s2[]) {
     return strcat(newLine, s2);
 }
 
-char *strmplN(char *s1) {
-    int i, j;
-
-    for (i = 0; s1[i] != 0; i++)
-        if (s1[i] == 92 && s1[i + 1] == 'n') {
-            s1[i++] = '\n';
-            for (j = i; s1[j] && s1[j + 1]; j++) {
-                s1[j] = s1[j + 1];
-            }
-            s1[j] = 0;
-        }
-
-    return s1;
-}
-
-char *strmplT(char *s1) {
-    int i, j;
-
-    for (i = 0; s1[i] != 0; i++)
-        if (s1[i] == 92 && s1[i + 1] == 't') {
-            s1[i++] = '\t';
-            for (j = i; s1[j] && s1[j + 1]; j++) {
-                s1[j] = s1[j + 1];
-            }
-            s1[j] = 0;
-        }
-    return s1;
-}
-
 char *iToStr(int num) {
     char *salida = (char *) calloc(1, TAM_LEXEMA);
     int i = 0;
@@ -1662,8 +1633,28 @@ struct typeAux factor(set folset) {
 
         appendMAC(CRCTS, iToStr(dameCS()));
 
-        strmplN(sbol->lexema);
-        strmplT(sbol->lexema);
+        char *s1 = sbol->lexema;
+        int i, j;
+        for (i = 0; s1[i] != 0; i++)
+        if (s1[i] == 92 && s1[i + 1] == 'n') {
+            s1[i++] = '\n';
+            for (j = i; s1[j] && s1[j + 1]; j++) {
+                s1[j] = s1[j + 1];
+            }
+            s1[j] = 0;
+        }
+
+        char *s2 = sbol->lexema;
+        int x, y;
+        for (x = 0; s2[x] != 0; x++){
+            if (s2[x] == 92 && s2[x + 1] == 't') {
+                s2[x++] = '\t';
+                for (y = x; s2[y] && s2[y + 1]; y++) {
+                    s2[y] = s2[y + 1];
+                }
+                s2[y] = 0;
+            }
+        }
 
         pushCS(sbol->lexema);
 
