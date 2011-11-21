@@ -140,12 +140,6 @@ char *concatString(char s1[], char s2[]) {
     return strcat(newLine, s2);
 }
 
-char *unionST(char s1[], char s2[]) {
-    newLine = (char *) calloc(1, 50);
-    strcat(newLine, s1);
-    return strcat(newLine, s2);
-}
-
 char *strmplN(char *s1) {
     int i, j;
 
@@ -197,7 +191,9 @@ char *iToStr(int num) {
         }
         return salida;
     } else {
-        return unionST("-", iToStr(-num));
+        newLine = (char *) calloc(1, 50);
+        strcat(newLine, "-");
+        return strcat(newLine, iToStr(-num));
     }
 }
 
