@@ -53,7 +53,7 @@ void error_print (int ne) {
   case 38: printf("\t Error %d: Falta constante\n", ne); break;
   case 39: printf("\t Error %d: El identificador debe ser una variable o par�metro\n", ne); break;
   case 40: printf("\t Error %d: En una expresion, los arreglos deben ser accedidos por sus elementos\n", ne); break;
-
+  case 41: printf("\t Error %d: Falta la referencia al índice en variable del tipo arreglo\n", ne); break;
 
     /* errores de recuperacion de errores */
   case 50: printf("\t Error %d: Al inicio del programa. \n", ne); break;

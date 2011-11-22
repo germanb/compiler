@@ -1450,7 +1450,7 @@ struct typeAux variable(set folset) {
                     Tipo_Retorno.tipo= ts[en_tabla(lexema)].ets->desc.part_var.arr.ptero_tipo_base;
                 }
             } else if (Tipo_Ident(lexema) == en_tabla("TIPOARREGLO")&&!isLlamadafuncion) {
-                error_handler(90); //decia 43
+                error_handler(41);
             } else {
 
                 Tipo_Retorno.tipo= Tipo_Ident(lexema);
